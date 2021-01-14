@@ -4,12 +4,12 @@
 
 - Build a dashboard for DSCI-532 course
 - Complete all milestones objectives
-- Achieve an excellent grade in the course.
+- Achieve an excellent grade in the course
 
 ## Communication
 
-- Zoom meeting: once a week (more meetings can be scheduled as required)
-- 30 mins
+- Zoom meeting: once a week (with more meetings to be scheduled as required)
+- 30 mins target
 
 ### Meeting Availability
 
