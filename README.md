@@ -19,3 +19,7 @@ This would help a user (such as a movie producer) find lead actors to star in th
 ### 4. Release month vs profit made
 
 This would help the user plan the release month for their movie. The user will be able to visualise the profit made by movies depending on which month they were released. The dashboard will display the profit made by movies grouped by their month of release. This could help the producer make a more informed choice on when to release their movie.
+
+## App Sketch
+
+![sketch of the app](img/app_sketch.png "App Sketch")
