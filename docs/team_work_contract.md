@@ -16,7 +16,7 @@
 | Member           | Availability                                                                               |
 | ---------------- | ------------------------------------------------------------------------------------------ |
 | Yanhua Chen      | 5 p.m. to 8 a.m UTC-8 Mon-Fri. Can be available for other hours with notice.               |
-| Rahul Kuriyedath |                                                                                            |
+| Rahul Kuriyedath | Typically 8pm PST to 8am PST Mon-Fri. Can be available for other hours with notice.        |
 | Yazan Saleh      | Typically 11 p.m. GMT to 6 a.m. GMT Mon-Fri. Can be available for other hours with notice. |
 
 ## Task collaboration
