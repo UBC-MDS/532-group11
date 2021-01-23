@@ -20,24 +20,49 @@ server = app.server
 data = read_data_2()
 
 
-@app.callback(
-    Output("profit_year", "srcDoc"),
-    Input("genres", "value"),
-    Input("years", "value"),
-)
-def plot_profit_vs_year(genres, years):
-    filtered_data = data.query(
-        "release_date >= @years[0] & release_date <= @years[1] & genres in @genres"
-    )
+def plot_heatmap(year):
+    plot_data = data[data["release_year"] >= year]
+    alt.data_transformers.disable_max_rows()
     chart = (
-        alt.Chart(filtered_data)
-        .mark_line(opacity=0.5)
+        alt.Chart(plot_data, title="Genres Popularity Comparison")
+        .mark_rect()
         .encode(
-            x=alt.X("month(release_date):O"),
-            y=alt.Y("median(profit):Q"),
-            color="genres",
+            x=alt.X("vote_average", bin=alt.Bin(maxbins=40)),
+            y="genres",
+            color="count()",
+            tooltip="count()",
         )
-    )
+    ).properties(width=280, height=350)
+    return chart.to_html()
+
+
+def plot_budget(genres):
+    # print(genres)
+    if len(genres) >= 1:
+        query = "genres == '" + genres[0] + "'"
+        for i in range(1, len(genres)):
+            query = query + " or genres == '" + genres[i] + "'"
+        genres_4 = data.query(
+            "genres == 'Drama' or genres == 'Action' or genres == 'Comedy' or genres == 'Animation'"
+        )
+        print(query)
+    else:
+        genres_4 = data
+
+    click = alt.selection_multi(fields=["genres"], bind="legend")
+    # genres_4 = processed.query("genres == 'Drama' or genres == 'Action' or genres == 'Comedy' or genres == 'Animation'")
+    chart = (
+        alt.Chart(genres_4)
+        .mark_line(point=True)
+        .encode(
+            alt.X("release_year", title="Year of release"),
+            alt.Y("mean(budget_adj)", title="Mean budget (Adjusted)"),
+            tooltip=["release_year", "mean(budget_adj)"],
+            color="genres",
+            opacity=alt.condition(click, alt.value(0.9), alt.value(0.05)),
+        )
+        .add_selection(click)
+    ).properties(width=280, height=350)
     return chart.to_html()
 
 
@@ -68,60 +93,24 @@ def generate_actor_table(genres, years):
     )
 
 
-def plot_heatmap(year):
-    plot_data = data[data["release_year"] >= year]
-    alt.data_transformers.disable_max_rows()
-    chart = (
-        alt.Chart(plot_data, title="Genres Popularity Comparison")
-        .mark_rect()
-        .encode(
-            x=alt.X("vote_average", bin=alt.Bin(maxbins=40)),
-            y="genres",
-            color="count()",
-            tooltip="count()",
-        )
+@app.callback(
+    Output("profit_year", "srcDoc"),
+    Input("genres", "value"),
+    Input("years", "value"),
+)
+def plot_profit_vs_year(genres, years):
+    filtered_data = data.query(
+        "release_date >= @years[0] & release_date <= @years[1] & genres in @genres"
     )
-    return chart.to_html()
-
-
-def plot_release(year, genre_type):
-    plot_data = data[data["release_year"] >= year]
-    plot_data = plot_data[plot_data["genres"] == genre_type]
     chart = (
-        alt.Chart(plot_data, title="Plan Your Movie Release")
-        .mark_point()
-        .encode(x=alt.X("release_month"), y=alt.Y("profit"), tooltip="original_title")
-    )
-    return chart.to_html()
-
-
-def plot_budget(genres):
-    # print(genres)
-    if len(genres) >= 1:
-        query = "genres == '" + genres[0] + "'"
-        for i in range(1, len(genres)):
-            query = query + " or genres == '" + genres[i] + "'"
-        genres_4 = data.query(
-            "genres == 'Drama' or genres == 'Action' or genres == 'Comedy' or genres == 'Animation'"
-        )
-        print(query)
-    else:
-        genres_4 = data
-
-    click = alt.selection_multi(fields=["genres"], bind="legend")
-    # genres_4 = processed.query("genres == 'Drama' or genres == 'Action' or genres == 'Comedy' or genres == 'Animation'")
-    chart = (
-        alt.Chart(genres_4)
-        .mark_line(point=True)
+        alt.Chart(filtered_data)
+        .mark_line()
         .encode(
-            alt.X("release_year", title="Year of release"),
-            alt.Y("mean(budget_adj)", title="Mean budget (Adjusted)"),
-            tooltip=["release_year", "mean(budget_adj)"],
+            x=alt.X("month(release_date):O"),
+            y=alt.Y("median(profit):Q"),
             color="genres",
-            opacity=alt.condition(click, alt.value(0.9), alt.value(0.05)),
         )
-        .add_selection(click)
-    ).properties(title="Mean adjusted budget over time")
+    ).properties(width=280, height=350)
     return chart.to_html()
 
 
@@ -150,13 +139,18 @@ app.layout = dbc.Container(
                             multi=True,
                         ),
                     ],
-                    md=2,
+                    md=5,
                     style={
-                        "height": "100vh",
-                        "border": "1px solid #d3d3d3",
+                        "width": "auto",
+                        "border": "0px",
                         "border-radius": "10px",
                     },
-                ),
+                )
+            ]
+        ),
+        html.Br(),
+        dbc.Row(
+            [
                 dbc.Col(
                     [
                         dbc.Row(
@@ -195,28 +189,25 @@ app.layout = dbc.Container(
                                         id="profit_year",
                                         style={
                                             "border-width": "0",
-                                            "width": "auto",
-                                            "height": "400px",
+                                            "width": "100%",
+                                            "height": "450px",
                                         },
                                     ),
                                 ),
                             ]
                         ),
                     ],
-                    md=10,
+                    md=12,
                     style={
+                        "width": "100%",
                         "height": "100vh",
                         "border": "1px solid #d3d3d3",
                         "border-radius": "10px",
                     },
-                ),
-            ],
-            style={
-                "width": "auto",
-            },
+                )
+            ]
         ),
     ],
-    style={"width": "auto"},
 )
 
 # app.layout = html.Div(
