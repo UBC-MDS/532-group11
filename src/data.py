@@ -68,6 +68,7 @@ def read_data_2():
         processed["genres"].str.split("|", expand=True).stack().values.tolist()
     )
 
+    processed.to_csv(r"data/processed/processed_movie_data.csv")
     return processed
 
 
@@ -103,4 +104,4 @@ def explode(df, lst_cols, fill_value="", preserve_index=False):
 
 
 if __name__ == "__main__":
-    read_data()
+    read_data_2()
