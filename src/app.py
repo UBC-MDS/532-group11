@@ -69,7 +69,7 @@ def generate_actor_table(genres, years):
 
 
 def plot_heatmap(year):
-    plot_data = processed[processed["release_year"] >= year]
+    plot_data = data[data["release_year"] >= year]
     alt.data_transformers.disable_max_rows()
     chart = (
         alt.Chart(plot_data, title="Genres Popularity Comparison")
@@ -85,7 +85,7 @@ def plot_heatmap(year):
 
 
 def plot_release(year, genre_type):
-    plot_data = processed[processed["release_year"] >= year]
+    plot_data = data[data["release_year"] >= year]
     plot_data = plot_data[plot_data["genres"] == genre_type]
     chart = (
         alt.Chart(plot_data, title="Plan Your Movie Release")
@@ -95,42 +95,166 @@ def plot_release(year, genre_type):
     return chart.to_html()
 
 
-app.layout = html.Div(
+def plot_budget(genres):
+    # print(genres)
+    if len(genres) >= 1:
+        query = "genres == '" + genres[0] + "'"
+        for i in range(1, len(genres)):
+            query = query + " or genres == '" + genres[i] + "'"
+        genres_4 = data.query(
+            "genres == 'Drama' or genres == 'Action' or genres == 'Comedy' or genres == 'Animation'"
+        )
+        print(query)
+    else:
+        genres_4 = data
+
+    click = alt.selection_multi(fields=["genres"], bind="legend")
+    # genres_4 = processed.query("genres == 'Drama' or genres == 'Action' or genres == 'Comedy' or genres == 'Animation'")
+    chart = (
+        alt.Chart(genres_4)
+        .mark_line(point=True)
+        .encode(
+            alt.X("release_year", title="Year of release"),
+            alt.Y("mean(budget_adj)", title="Mean budget (Adjusted)"),
+            tooltip=["release_year", "mean(budget_adj)"],
+            color="genres",
+            opacity=alt.condition(click, alt.value(0.9), alt.value(0.05)),
+        )
+        .add_selection(click)
+    ).properties(title="Mean adjusted budget over time")
+    return chart.to_html()
+
+
+app.layout = dbc.Container(
     [
-        html.Label(
+        html.H1("Movie Production Planner"),
+        dbc.Row(
             [
-                "Genre Selector",
-                dcc.Dropdown(
-                    id="genres",
-                    options=[
-                        {"label": col, "value": col} for col in data["genres"].unique()
+                dbc.Col(
+                    [
+                        dcc.RangeSlider(
+                            id="years",
+                            count=1,
+                            min=1960,
+                            max=2015,
+                            step=1,
+                            value=[2011, 2014],
+                        ),
+                        dcc.Dropdown(
+                            id="genres",
+                            options=[
+                                {"label": col, "value": col}
+                                for col in data["genres"].unique()
+                            ],
+                            value=["Action", "Drama", "Comedy"],
+                            multi=True,
+                        ),
                     ],
-                    value=["Action", "Drama", "Comedy"],
-                    multi=True,
+                    md=2,
+                    style={
+                        "height": "100vh",
+                        "border": "1px solid #d3d3d3",
+                        "border-radius": "10px",
+                    },
                 ),
-            ]
-        ),
-        html.Label(
-            [
-                "Year",
-                dcc.RangeSlider(
-                    id="years",
-                    count=1,
-                    min=1960,
-                    max=2015,
-                    step=1,
-                    value=[2011, 2014],
+                dbc.Col(
+                    [
+                        dbc.Row(
+                            [
+                                dbc.Col(
+                                    html.Iframe(
+                                        id="genre_rate",
+                                        srcDoc=plot_heatmap(year=2005),
+                                        style={
+                                            "border-width": "0",
+                                            "width": "100%",
+                                            "height": "500px",
+                                        },
+                                    )
+                                ),
+                                dbc.Col(
+                                    html.Iframe(
+                                        id="release_time",
+                                        srcDoc=plot_budget(genres=["Action"]),
+                                        style={
+                                            "border-width": "0",
+                                            "width": "100%",
+                                            "height": "500px",
+                                        },
+                                    )
+                                ),
+                            ]
+                        ),
+                        dbc.Row(
+                            [
+                                dbc.Col(
+                                    html.Table(id="actor_table"),
+                                ),
+                                dbc.Col(
+                                    html.Iframe(
+                                        id="profit_year",
+                                        style={
+                                            "border-width": "0",
+                                            "width": "auto",
+                                            "height": "400px",
+                                        },
+                                    ),
+                                ),
+                            ]
+                        ),
+                    ],
+                    md=10,
+                    style={
+                        "height": "100vh",
+                        "border": "1px solid #d3d3d3",
+                        "border-radius": "10px",
+                    },
                 ),
-            ]
+            ],
+            style={
+                "width": "auto",
+            },
         ),
-        html.Iframe(
-            id="profit_year",
-            style={"border-width": "0", "width": "100%", "height": "400px"},
-        ),
-        html.Br(),
-        html.Table(id="actor_table"),
-    ]
+    ],
+    style={"width": "auto"},
 )
+
+# app.layout = html.Div(
+#     [
+#         html.Label(
+#             [
+#                 "Genre Selector",
+#                 dcc.Dropdown(
+#                     id="genres",
+#                     options=[
+#                         {"label": col, "value": col} for col in data["genres"].unique()
+#                     ],
+#                     value=["Action", "Drama", "Comedy"],
+#                     multi=True,
+#                 ),
+#             ]
+#         ),
+#         html.Label(
+#             [
+#                 "Year",
+#                 dcc.RangeSlider(
+#                     id="years",
+#                     count=1,
+#                     min=1960,
+#                     max=2015,
+#                     step=1,
+#                     value=[2011, 2014],
+#                 ),
+#             ]
+#         ),
+#         html.Iframe(
+#             id="profit_year",
+#             style={"border-width": "0", "width": "100%", "height": "400px"},
+#         ),
+#         html.Br(),
+#         html.Table(id="actor_table"),
+#     ]
+# )
 
 
 if __name__ == "__main__":
