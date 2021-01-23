@@ -8,6 +8,7 @@ from dash.dependencies import Input, Output
 # Core data science libraries
 import altair as alt
 import pandas as pd
+import random
 
 # Data loading functions
 from data import read_data
@@ -39,7 +40,7 @@ def plot_heatmap(genres, years):
             color=alt.Color("count()", title="Count"),
             tooltip="count()",
         )
-    ).properties(width=280, height=300)
+    ).properties(width=350, height=300)
     return chart.to_html()
 
 
@@ -54,7 +55,7 @@ def plot_linechart(genres, years):
     )
     click = alt.selection_multi(fields=["genres"], bind="legend")
     chart = (
-        alt.Chart(filtered_data, title="Mean budget by Release Year")
+        alt.Chart(filtered_data, title="Mean Budget by Release Year")
         .mark_line(point=True)
         .encode(
             alt.X("release_year", title="Release Year"),
@@ -104,6 +105,7 @@ def plot_profit_vs_year(genres, years):
     filtered_data = data.query(
         "release_date >= @years[0] & release_date <= @years[1] & genres in @genres"
     )
+    click = alt.selection_multi(fields=["genres"], bind="legend")
     chart = (
         alt.Chart(filtered_data, title="Median Profit by Release Month")
         .mark_line(point=True)
@@ -111,9 +113,15 @@ def plot_profit_vs_year(genres, years):
             x=alt.X("month(release_date):O", title="Release Month"),
             y=alt.Y("median(profit):Q", title="Adjusted Profit ($)"),
             color=alt.Color("genres", title="Genre"),
+            opacity=alt.condition(click, alt.value(0.9), alt.value(0.05)),
         )
+        .add_selection(click)
     ).properties(width=280, height=350)
     return chart.to_html()
+
+
+def init_genres():
+    return random.sample(list(data["genres"].unique()), 6)
 
 
 app.layout = dbc.Container(
@@ -135,7 +143,7 @@ app.layout = dbc.Container(
                             step=1,
                             min=data["release_year"].min(),
                             max=data["release_year"].max(),
-                            value=[2000, 2010],
+                            value=[2000, 2016],
                             marks={1960: "1960", 2015: "2015"},
                             tooltip={"always_visible": False, "placement": "top"},
                         ),
@@ -157,7 +165,7 @@ app.layout = dbc.Container(
                                         {"label": col, "value": col}
                                         for col in data["genres"].unique()
                                     ],
-                                    value=data["genres"].unique(),
+                                    value=init_genres(),
                                     multi=True,
                                 ),
                             ]
@@ -230,43 +238,6 @@ app.layout = dbc.Container(
         ),
     ],
 )
-
-# app.layout = html.Div(
-#     [
-#         html.Label(
-#             [
-#                 "Genre Selector",
-#                 dcc.Dropdown(
-#                     id="genres",
-#                     options=[
-#                         {"label": col, "value": col} for col in data["genres"].unique()
-#                     ],
-#                     value=["Action", "Drama", "Comedy"],
-#                     multi=True,
-#                 ),
-#             ]
-#         ),
-#         html.Label(
-#             [
-#                 "Year",
-#                 dcc.RangeSlider(
-#                     id="years",
-#                     count=1,
-#                     min=1960,
-#                     max=2015,
-#                     step=1,
-#                     value=[2011, 2014],
-#                 ),
-#             ]
-#         ),
-#         html.Iframe(
-#             id="profit_year",
-#             style={"border-width": "0", "width": "100%", "height": "400px"},
-#         ),
-#         html.Br(),
-#         html.Table(id="actor_table"),
-#     ]
-# )
 
 
 if __name__ == "__main__":
