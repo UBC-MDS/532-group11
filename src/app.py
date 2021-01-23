@@ -3,6 +3,7 @@ import dash_core_components as dcc
 import dash_html_components as html
 import altair as alt
 from data import read_data
+from data import read_data_2
 from dash.dependencies import Input, Output
 import pandas as pd
 
@@ -11,7 +12,7 @@ app = dash.Dash(
     __name__, external_stylesheets=["https://codepen.io/chriddyp/pen/bWLwgP.css"]
 )
 server = app.server
-data = read_data()
+data = read_data_2()
 
 
 @app.callback(
@@ -21,7 +22,7 @@ data = read_data()
 )
 def plot_profit_vs_year(genres, years):
     filtered_data = data.query(
-        "release_date >= @years[0] & release_date <= @years[1] & primary_genre in @genres"
+        "release_date >= @years[0] & release_date <= @years[1] & genres in @genres"
     )
     chart = (
         alt.Chart(filtered_data)
@@ -29,7 +30,7 @@ def plot_profit_vs_year(genres, years):
         .encode(
             x=alt.X("month(release_date):O"),
             y=alt.Y("median(profit):Q"),
-            color="primary_genre",
+            color="genres",
         )
     )
     return chart.to_html()
@@ -40,10 +41,10 @@ def plot_profit_vs_year(genres, years):
 )
 def generate_actor_table(genres, years):
     # filtered_data = data.query(
-    #     " budget_adj >= @b_q[0] & budget_adj <= @b_q[1] & primary_genre in @g_q"
+    #     " budget_adj >= @b_q[0] & budget_adj <= @b_q[1] & genre in @g_q"
     # )
     filtered_data = data.query(
-        "release_date >= @years[0] & release_date <= @years[1] & primary_genre in @genres"
+        "release_date >= @years[0] & release_date <= @years[1] & genres in @genres"
     )
     top_actors = pd.DataFrame(
         pd.Series(filtered_data["cast"].str.cat(sep="|").split("|")).value_counts(),
@@ -70,8 +71,7 @@ app.layout = html.Div(
                 dcc.Dropdown(
                     id="genres",
                     options=[
-                        {"label": col, "value": col}
-                        for col in data["primary_genre"].unique()
+                        {"label": col, "value": col} for col in data["genres"].unique()
                     ],
                     value=["Action", "Drama", "Comedy"],
                     multi=True,
