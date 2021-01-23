@@ -20,45 +20,47 @@ server = app.server
 data = read_data_2()
 
 
-def plot_heatmap(year):
-    plot_data = data[data["release_year"] >= year]
+@app.callback(
+    Output("heatmap", "srcDoc"),
+    Input("genres", "value"),
+    Input("years", "value"),
+)
+def plot_heatmap(genres, years):
+    filtered_data = data.query(
+        "release_date >= @years[0] & release_date <= @years[1] & genres in @genres"
+    )
     alt.data_transformers.disable_max_rows()
     chart = (
-        alt.Chart(plot_data, title="Genres Popularity Comparison")
+        alt.Chart(filtered_data, title="Vote Average by Genre")
         .mark_rect()
         .encode(
-            x=alt.X("vote_average", bin=alt.Bin(maxbins=40)),
-            y="genres",
-            color="count()",
+            x=alt.X("vote_average", bin=alt.Bin(maxbins=40), title="Vote Average"),
+            y=alt.Y("genres", title=""),
+            color=alt.Color("count()", title="Count"),
             tooltip="count()",
         )
-    ).properties(width=280, height=350)
+    ).properties(width=280, height=300)
     return chart.to_html()
 
 
-def plot_budget(genres):
-    # print(genres)
-    if len(genres) >= 1:
-        query = "genres == '" + genres[0] + "'"
-        for i in range(1, len(genres)):
-            query = query + " or genres == '" + genres[i] + "'"
-        genres_4 = data.query(
-            "genres == 'Drama' or genres == 'Action' or genres == 'Comedy' or genres == 'Animation'"
-        )
-        print(query)
-    else:
-        genres_4 = data
-
+@app.callback(
+    Output("linechart", "srcDoc"),
+    Input("genres", "value"),
+    Input("years", "value"),
+)
+def plot_linechart(genres, years):
+    filtered_data = data.query(
+        "release_date >= @years[0] & release_date <= @years[1] & genres in @genres"
+    )
     click = alt.selection_multi(fields=["genres"], bind="legend")
-    # genres_4 = processed.query("genres == 'Drama' or genres == 'Action' or genres == 'Comedy' or genres == 'Animation'")
     chart = (
-        alt.Chart(genres_4)
+        alt.Chart(filtered_data, title="Mean budget by Release Year")
         .mark_line(point=True)
         .encode(
-            alt.X("release_year", title="Year of release"),
-            alt.Y("mean(budget_adj)", title="Mean budget (Adjusted)"),
+            alt.X("release_year", title="Release Year"),
+            alt.Y("mean(budget_adj)", title="Adjusted Mean Budget ($)"),
             tooltip=["release_year", "mean(budget_adj)"],
-            color="genres",
+            color=alt.Color("genres", title="Genre"),
             opacity=alt.condition(click, alt.value(0.9), alt.value(0.05)),
         )
         .add_selection(click)
@@ -103,12 +105,12 @@ def plot_profit_vs_year(genres, years):
         "release_date >= @years[0] & release_date <= @years[1] & genres in @genres"
     )
     chart = (
-        alt.Chart(filtered_data)
-        .mark_line()
+        alt.Chart(filtered_data, title="Median Profit by Release Month")
+        .mark_line(point=True)
         .encode(
-            x=alt.X("month(release_date):O"),
-            y=alt.Y("median(profit):Q"),
-            color="genres",
+            x=alt.X("month(release_date):O", title="Release Month"),
+            y=alt.Y("median(profit):Q", title="Adjusted Profit ($)"),
+            color=alt.Color("genres", title="Genre"),
         )
     ).properties(width=280, height=350)
     return chart.to_html()
@@ -117,36 +119,57 @@ def plot_profit_vs_year(genres, years):
 app.layout = dbc.Container(
     [
         html.H1("Movie Production Planner"),
+        html.Br(),
         dbc.Row(
             [
                 dbc.Col(
                     [
+                        html.Label(
+                            [
+                                "Years",
+                            ]
+                        ),
                         dcc.RangeSlider(
                             id="years",
                             count=1,
-                            min=1960,
-                            max=2015,
                             step=1,
-                            value=[2011, 2014],
-                        ),
-                        dcc.Dropdown(
-                            id="genres",
-                            options=[
-                                {"label": col, "value": col}
-                                for col in data["genres"].unique()
-                            ],
-                            value=["Action", "Drama", "Comedy"],
-                            multi=True,
+                            min=data["release_year"].min(),
+                            max=data["release_year"].max(),
+                            value=[2000, 2010],
+                            marks={1960: "1960", 2015: "2015"},
+                            tooltip={"always_visible": False, "placement": "top"},
                         ),
                     ],
-                    md=5,
+                    md=6,
                     style={
-                        "width": "auto",
                         "border": "0px",
                         "border-radius": "10px",
                     },
-                )
-            ]
+                ),
+                dbc.Col(
+                    [
+                        html.Label(
+                            [
+                                "Genres",
+                                dcc.Dropdown(
+                                    id="genres",
+                                    options=[
+                                        {"label": col, "value": col}
+                                        for col in data["genres"].unique()
+                                    ],
+                                    value=data["genres"].unique(),
+                                    multi=True,
+                                ),
+                            ]
+                        ),
+                    ],
+                    md=6,
+                    style={
+                        "border": "0px",
+                        "border-radius": "10px",
+                    },
+                ),
+            ],
         ),
         html.Br(),
         dbc.Row(
@@ -157,19 +180,17 @@ app.layout = dbc.Container(
                             [
                                 dbc.Col(
                                     html.Iframe(
-                                        id="genre_rate",
-                                        srcDoc=plot_heatmap(year=2005),
+                                        id="heatmap",
                                         style={
                                             "border-width": "0",
                                             "width": "100%",
-                                            "height": "500px",
+                                            "height": "100%",
                                         },
                                     )
                                 ),
                                 dbc.Col(
                                     html.Iframe(
-                                        id="release_time",
-                                        srcDoc=plot_budget(genres=["Action"]),
+                                        id="linechart",
                                         style={
                                             "border-width": "0",
                                             "width": "100%",
