@@ -1,16 +1,21 @@
+# Dash components
 import dash
 import dash_core_components as dcc
 import dash_html_components as html
-import altair as alt
-from data import read_data
-from data import read_data_2
+import dash_bootstrap_components as dbc
 from dash.dependencies import Input, Output
+
+# Core data science libraries
+import altair as alt
 import pandas as pd
 
+# Data loading functions
+from data import read_data
+from data import read_data_2
 
-app = dash.Dash(
-    __name__, external_stylesheets=["https://codepen.io/chriddyp/pen/bWLwgP.css"]
-)
+
+app = dash.Dash(external_stylesheets=[dbc.themes.BOOTSTRAP])
+
 server = app.server
 data = read_data_2()
 
@@ -61,6 +66,33 @@ def generate_actor_table(genres, years):
             ]
         ),
     )
+
+
+def plot_heatmap(year):
+    plot_data = processed[processed["release_year"] >= year]
+    alt.data_transformers.disable_max_rows()
+    chart = (
+        alt.Chart(plot_data, title="Genres Popularity Comparison")
+        .mark_rect()
+        .encode(
+            x=alt.X("vote_average", bin=alt.Bin(maxbins=40)),
+            y="genres",
+            color="count()",
+            tooltip="count()",
+        )
+    )
+    return chart.to_html()
+
+
+def plot_release(year, genre_type):
+    plot_data = processed[processed["release_year"] >= year]
+    plot_data = plot_data[plot_data["genres"] == genre_type]
+    chart = (
+        alt.Chart(plot_data, title="Plan Your Movie Release")
+        .mark_point()
+        .encode(x=alt.X("release_month"), y=alt.Y("profit"), tooltip="original_title")
+    )
+    return chart.to_html()
 
 
 app.layout = html.Div(
