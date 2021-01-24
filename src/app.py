@@ -70,14 +70,15 @@ def plot_linechart(genres, years):
 
 
 @app.callback(
-    Output("actor_table", "children"), Input("genres", "value"), Input("years", "value")
+    Output("actor_table", "children"),
+    Input("genres_drill", "value"),
+    Input("years", "value"),
+    Input("budget", "value"),
 )
-def generate_actor_table(genres, years):
-    # filtered_data = data.query(
-    #     " budget_adj >= @b_q[0] & budget_adj <= @b_q[1] & genre in @g_q"
-    # )
+def generate_actor_table(selected_genre, years, budget):
+    print(budget)
     filtered_data = data.query(
-        "release_date >= @years[0] & release_date <= @years[1] & genres in @genres"
+        "release_date >= @years[0] & release_date <= @years[1] & genres == @selected_genre & budget_adj >= @budget[0] & budget_adj <= @budget[1]"
     )
     top_actors = pd.DataFrame(
         pd.Series(filtered_data["cast"].str.cat(sep="|").split("|")).value_counts(),
@@ -86,10 +87,19 @@ def generate_actor_table(genres, years):
     top_actors.index.names = ["actor"]
     top_actors.reset_index(inplace=True)
     return (
-        html.Thead(html.Tr(children=[html.Th("Actor"), html.Th("No. of Movies")])),
+        html.Thead(
+            html.Tr(
+                children=[
+                    html.Th("Actor"),
+                    html.Th("# of matching movies they starred in"),
+                ]
+            )
+        ),
         html.Tbody(
             [
-                html.Tr(children=[html.Td(data[0]), html.Td(data[1])])
+                html.Tr(
+                    children=[html.Td(data[0]), html.Td(html.Br()), html.Td(data[1])]
+                )
                 for data in top_actors[["actor", "count"]][1:6].values
             ]
         ),
@@ -122,6 +132,18 @@ def plot_profit_vs_year(genres, years):
 
 def init_genres():
     return random.sample(list(data["genres"].unique()), 6)
+
+
+@app.callback(
+    Output("genres_drill", "options"),
+    Output("genres_drill", "value"),
+    Input("genres", "value"),
+)
+def update_genres(genres):
+    options_list = []
+    for item in genres:
+        options_list.append({"label": item, "value": item})
+    return (options_list, options_list[0]["label"])
 
 
 app.layout = dbc.Container(
@@ -180,48 +202,151 @@ app.layout = dbc.Container(
             ],
         ),
         html.Br(),
+        ## Main Plots Area
         dbc.Row(
             [
                 dbc.Col(
                     [
+                        # First Row of Plots
                         dbc.Row(
                             [
                                 dbc.Col(
-                                    html.Iframe(
-                                        id="heatmap",
-                                        style={
-                                            "border-width": "0",
-                                            "width": "100%",
-                                            "height": "100%",
-                                        },
-                                    )
+                                    [
+                                        html.Br(),
+                                        html.Label(
+                                            "Identify most-liked genres",
+                                            style={"font-size": 20},
+                                        ),
+                                        html.Iframe(
+                                            id="heatmap",
+                                            style={
+                                                "border-width": "0",
+                                                "width": "100%",
+                                                "height": "100%",
+                                            },
+                                        ),
+                                    ]
                                 ),
                                 dbc.Col(
-                                    html.Iframe(
-                                        id="linechart",
-                                        style={
-                                            "border-width": "0",
-                                            "width": "100%",
-                                            "height": "500px",
-                                        },
-                                    )
+                                    [
+                                        html.Br(),
+                                        html.Label(
+                                            "Discover historical and recent budget trends",
+                                            style={"font-size": 20},
+                                        ),
+                                        html.Iframe(
+                                            id="linechart",
+                                            style={
+                                                "border-width": "0",
+                                                "width": "100%",
+                                                "height": "500px",
+                                            },
+                                        ),
+                                    ]
                                 ),
                             ]
                         ),
+                        # Second Row of Plots
                         dbc.Row(
                             [
                                 dbc.Col(
-                                    html.Table(id="actor_table"),
+                                    [
+                                        html.Br(),
+                                        html.Label(
+                                            "Find some potential actors",
+                                            style={"font-size": 20},
+                                        ),
+                                        dbc.Row(
+                                            [
+                                                dbc.Col(
+                                                    html.Label(
+                                                        [
+                                                            "1. Drill down on a specific genre",
+                                                            dcc.Dropdown(
+                                                                id="genres_drill",
+                                                                multi=False,
+                                                                style={
+                                                                    "width": "200px"
+                                                                },
+                                                            ),
+                                                        ]
+                                                    ),
+                                                )
+                                            ]
+                                        ),
+                                        dbc.Row(
+                                            [
+                                                dbc.Col(
+                                                    [
+                                                        html.Label(
+                                                            [
+                                                                "2. Narrow down your budget"
+                                                            ]
+                                                        ),
+                                                        dcc.RangeSlider(
+                                                            id="budget",
+                                                            count=1,
+                                                            step=1,
+                                                            min=data[
+                                                                "budget_adj"
+                                                            ].min(),
+                                                            max=data[
+                                                                "budget_adj"
+                                                            ].max(),
+                                                            value=[0, 425000000],
+                                                            marks={
+                                                                0.99: "0",
+                                                                425000000: "425,000,000",
+                                                            },
+                                                            tooltip={
+                                                                "always_visible": False,
+                                                                "placement": "top",
+                                                            },
+                                                        ),
+                                                    ],
+                                                    style={"width": "100px"},
+                                                )
+                                            ]
+                                        ),
+                                        dbc.Row(
+                                            [
+                                                dbc.Col(
+                                                    [
+                                                        html.Label(
+                                                            ["3. Select an actor!"]
+                                                        )
+                                                    ]
+                                                )
+                                            ]
+                                        ),
+                                        dbc.Row(
+                                            [
+                                                dbc.Col(
+                                                    [
+                                                        html.Table(id="actor_table"),
+                                                        html.Br(),
+                                                    ]
+                                                )
+                                            ]
+                                        ),
+                                    ]
                                 ),
                                 dbc.Col(
-                                    html.Iframe(
-                                        id="profit_year",
-                                        style={
-                                            "border-width": "0",
-                                            "width": "100%",
-                                            "height": "450px",
-                                        },
-                                    ),
+                                    [
+                                        html.Br(),
+                                        html.Label(
+                                            "Plan your release month",
+                                            style={"font-size": 20},
+                                        ),
+                                        html.Iframe(
+                                            id="profit_year",
+                                            style={
+                                                "border-width": "0",
+                                                "width": "100%",
+                                                "height": "450px",
+                                            },
+                                        ),
+                                    ]
                                 ),
                             ]
                         ),
@@ -229,7 +354,7 @@ app.layout = dbc.Container(
                     md=12,
                     style={
                         "width": "100%",
-                        "height": "100vh",
+                        "height": "100%",
                         "border": "1px solid #d3d3d3",
                         "border-radius": "10px",
                     },
