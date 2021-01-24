@@ -12,7 +12,6 @@ import random
 
 # Data loading functions
 from data import read_data
-from data import read_data_2
 
 
 app = dash.Dash(external_stylesheets=[dbc.themes.BOOTSTRAP])
