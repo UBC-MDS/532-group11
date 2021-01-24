@@ -1,5 +1,9 @@
 # Movie Production Planning Dashboard
 
+## Link to the deployed app
+
+https://moveymoney.herokuapp.com/
+
 ## Description of the app
 
 This data visualization app aims at helping movie producers plan their next release (For more details please see the [proposal document](proposal.md)). The app contains a landing page with 4 key visualizations. A set of global filters located on the left hand menu control these visualizations. These include a dropdown menu allowing multi-selection of genres and a date range selector to narrow down results based on movie release date. The 4 key visualization allow the user to answer different questions. These are :-
