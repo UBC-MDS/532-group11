@@ -17,7 +17,7 @@ from data import read_data
 app = dash.Dash(external_stylesheets=[dbc.themes.BOOTSTRAP])
 
 server = app.server
-data = read_data_2()
+data = read_data()
 
 
 @app.callback(
