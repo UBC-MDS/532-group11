@@ -1,4 +1,5 @@
 pandas
+numpy
 gunicorn
 altair
 dash==1.18.1
