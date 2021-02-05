@@ -20,6 +20,8 @@ app = dash.Dash(external_stylesheets=[dbc.themes.MINTY])
 server = app.server
 data = read_data()
 
+alt.themes.enable("fivethirtyeight")
+
 
 @app.callback(
     Output("heatmap", "srcDoc"),
@@ -67,42 +69,6 @@ def plot_linechart(genres, years):
         .add_selection(click)
     ).properties(width=280, height=350)
     return chart.to_html()
-
-
-# @app.callback(
-#     Output("actor_table", "children"),
-#     Input("genres_drill", "value"),
-#     Input("years", "value"),
-#     Input("budget", "value"),
-# )
-# def generate_actor_table(selected_genre, years, budget):
-#     filtered_data = data.query(
-#         "release_date >= @years[0] & release_date <= @years[1] & genres == @selected_genre & budget_adj >= @budget[0] & budget_adj <= @budget[1]"
-#     )
-#     top_actors = pd.DataFrame(
-#         pd.Series(filtered_data["cast"].str.cat(sep="|").split("|")).value_counts(),
-#         columns=["count"],
-#     )
-#     top_actors.index.names = ["actor"]
-#     top_actors.reset_index(inplace=True)
-#     return (
-#         html.Thead(
-#             html.Tr(
-#                 children=[
-#                     html.Th("Actor"),
-#                     html.Th("# of matching movies they starred in"),
-#                 ]
-#             )
-#         ),
-#         html.Tbody(
-#             [
-#                 html.Tr(
-#                     children=[html.Td(data[0]), html.Td(html.Br()), html.Td(data[1])]
-#                 )
-#                 for data in top_actors[["actor", "count"]][1:6].values
-#             ]
-#         ),
-#     )
 
 
 @app.callback(
@@ -218,6 +184,7 @@ app.layout = dbc.Container(
                             ]
                         ),
                         dcc.RangeSlider(
+                            className="slider_class",
                             id="years",
                             count=1,
                             step=1,
@@ -250,7 +217,13 @@ app.layout = dbc.Container(
                                         {"label": col, "value": col}
                                         for col in data["genres"].unique()
                                     ],
-                                    value=init_genres(),
+                                    value=[
+                                        "Action",
+                                        "Drama",
+                                        "Adventure",
+                                        "Family",
+                                        "Animation",
+                                    ],
                                     multi=True,
                                 ),
                             ]
