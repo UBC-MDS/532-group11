@@ -14,7 +14,7 @@ import random
 from data import read_data
 
 
-app = dash.Dash(external_stylesheets=[dbc.themes.BOOTSTRAP])
+app = dash.Dash(external_stylesheets=[dbc.themes.MINTY])
 
 server = app.server
 data = read_data()
@@ -75,7 +75,6 @@ def plot_linechart(genres, years):
     Input("budget", "value"),
 )
 def generate_actor_table(selected_genre, years, budget):
-    print(budget)
     filtered_data = data.query(
         "release_date >= @years[0] & release_date <= @years[1] & genres == @selected_genre & budget_adj >= @budget[0] & budget_adj <= @budget[1]"
     )
@@ -147,7 +146,20 @@ def update_genres(genres):
 
 app.layout = dbc.Container(
     [
-        html.H1("Movie Production Planner"),
+        html.H1(
+            "Movie Production Planner",
+            style={
+                "backgroundColor": "#78c2ad",
+                "padding": 20,
+                "color": "white",
+                "margin-top": 20,
+                "margin-bottom": 20,
+                "text-align": "left",
+                "font-size": "48px",
+                "border-radius": 3,
+            },
+        ),  # , 'width': 300}),
+        # jumbotron,
         html.Br(),
         dbc.Row(
             [
