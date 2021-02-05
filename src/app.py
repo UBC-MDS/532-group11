@@ -5,6 +5,7 @@ import dash_html_components as html
 import dash_bootstrap_components as dbc
 from dash.dependencies import Input, Output
 import dash_table
+from Custom_Theme import mm
 
 # Core data science libraries
 import altair as alt
@@ -20,7 +21,7 @@ app = dash.Dash(external_stylesheets=[dbc.themes.MINTY])
 server = app.server
 data = read_data()
 
-alt.themes.enable("fivethirtyeight")
+alt.themes.enable("latimes")
 
 
 @app.callback(
@@ -60,12 +61,14 @@ def plot_linechart(genres, years):
         alt.Chart(filtered_data, title="Mean Budget by Release Year")
         .mark_line(point=True)
         .encode(
-            alt.X("release_year", title="Release Year"),
-            alt.Y("mean(budget_adj)", title="Adjusted Mean Budget ($)"),
+            alt.X("release_year", title="Release Year", axis=alt.Axis(format="y")),
+            alt.Y("mean(budget_adj)", title="Adjusted Mean Budget ($m)"),
             tooltip=["release_year", "mean(budget_adj)"],
             color=alt.Color("genres", title="Genre"),
             opacity=alt.condition(click, alt.value(0.9), alt.value(0.05)),
         )
+        .configure_axis(grid=False)
+        .configure_view(strokeOpacity=0)
         .add_selection(click)
     ).properties(width=280, height=350)
     return chart.to_html()
@@ -111,7 +114,6 @@ def generate_dash_table(selected_genre, years, budget):
         style_data_conditional=[
             {"if": {"row_index": "odd"}, "backgroundColor": "rgb(240, 240, 230)"}
         ],
-        filter_action="native",
         style_cell={"padding": "7px"},
     )
     return table
@@ -136,6 +138,8 @@ def plot_profit_vs_year(genres, years):
             color=alt.Color("genres", title="Genre"),
             opacity=alt.condition(click, alt.value(0.9), alt.value(0.05)),
         )
+        .configure_axis(grid=False)
+        .configure_view(strokeOpacity=0)
         .add_selection(click)
     ).properties(width=280, height=350)
     return chart.to_html()
