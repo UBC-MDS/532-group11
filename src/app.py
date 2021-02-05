@@ -4,6 +4,7 @@ import dash_core_components as dcc
 import dash_html_components as html
 import dash_bootstrap_components as dbc
 from dash.dependencies import Input, Output
+import dash_table
 
 # Core data science libraries
 import altair as alt
@@ -68,13 +69,49 @@ def plot_linechart(genres, years):
     return chart.to_html()
 
 
+# @app.callback(
+#     Output("actor_table", "children"),
+#     Input("genres_drill", "value"),
+#     Input("years", "value"),
+#     Input("budget", "value"),
+# )
+# def generate_actor_table(selected_genre, years, budget):
+#     filtered_data = data.query(
+#         "release_date >= @years[0] & release_date <= @years[1] & genres == @selected_genre & budget_adj >= @budget[0] & budget_adj <= @budget[1]"
+#     )
+#     top_actors = pd.DataFrame(
+#         pd.Series(filtered_data["cast"].str.cat(sep="|").split("|")).value_counts(),
+#         columns=["count"],
+#     )
+#     top_actors.index.names = ["actor"]
+#     top_actors.reset_index(inplace=True)
+#     return (
+#         html.Thead(
+#             html.Tr(
+#                 children=[
+#                     html.Th("Actor"),
+#                     html.Th("# of matching movies they starred in"),
+#                 ]
+#             )
+#         ),
+#         html.Tbody(
+#             [
+#                 html.Tr(
+#                     children=[html.Td(data[0]), html.Td(html.Br()), html.Td(data[1])]
+#                 )
+#                 for data in top_actors[["actor", "count"]][1:6].values
+#             ]
+#         ),
+#     )
+
+
 @app.callback(
     Output("actor_table", "children"),
     Input("genres_drill", "value"),
     Input("years", "value"),
     Input("budget", "value"),
 )
-def generate_actor_table(selected_genre, years, budget):
+def generate_dash_table(selected_genre, years, budget):
     filtered_data = data.query(
         "release_date >= @years[0] & release_date <= @years[1] & genres == @selected_genre & budget_adj >= @budget[0] & budget_adj <= @budget[1]"
     )
@@ -84,24 +121,33 @@ def generate_actor_table(selected_genre, years, budget):
     )
     top_actors.index.names = ["actor"]
     top_actors.reset_index(inplace=True)
-    return (
-        html.Thead(
-            html.Tr(
-                children=[
-                    html.Th("Actor"),
-                    html.Th("# of matching movies they starred in"),
-                ]
-            )
-        ),
-        html.Tbody(
-            [
-                html.Tr(
-                    children=[html.Td(data[0]), html.Td(html.Br()), html.Td(data[1])]
-                )
-                for data in top_actors[["actor", "count"]][1:6].values
-            ]
-        ),
+    table = dash_table.DataTable(
+        id="actorDataTable",
+        columns=[
+            {
+                "name": "Actor Name",
+                "id": "actor",
+                "selectable": True,
+            },
+            {
+                "name": "Count",
+                "id": "count",
+                "selectable": True,
+            },
+        ],
+        data=top_actors.to_dict("records"),
+        page_size=5,
+        style_cell={"class": "table-secondary"},
+        style_header={
+            "backgroundColor": "rgb(230, 230, 230)",
+            "fontWeight": "bold",
+            "class": "table",
+        },
+        style_data_conditional=[
+            {"if": {"row_index": "odd"}, "backgroundColor": "rgb(1, 248, 248)"}
+        ],
     )
+    return table
 
 
 @app.callback(
@@ -177,7 +223,12 @@ app.layout = dbc.Container(
                             min=data["release_year"].min(),
                             max=data["release_year"].max(),
                             value=[2000, 2016],
-                            marks={1960: "1960", 2015: "2015"},
+                            marks={
+                                1960: {
+                                    "label": "1960",
+                                },
+                                2015: {"label": "2015"},
+                            },
                             tooltip={"always_visible": False, "placement": "top"},
                         ),
                     ],
@@ -336,7 +387,7 @@ app.layout = dbc.Container(
                                                     [
                                                         html.Table(id="actor_table"),
                                                         html.Br(),
-                                                    ]
+                                                    ],
                                                 )
                                             ]
                                         ),
