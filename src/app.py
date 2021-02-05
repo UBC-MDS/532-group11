@@ -106,7 +106,7 @@ def plot_linechart(genres, years):
 
 
 @app.callback(
-    Output("actor_table", "children"),
+    Output("actor_col", "children"),
     Input("genres_drill", "value"),
     Input("years", "value"),
     Input("budget", "value"),
@@ -137,15 +137,16 @@ def generate_dash_table(selected_genre, years, budget):
         ],
         data=top_actors.to_dict("records"),
         page_size=5,
-        style_cell={"class": "table-secondary"},
         style_header={
             "backgroundColor": "rgb(230, 230, 230)",
             "fontWeight": "bold",
             "class": "table",
         },
         style_data_conditional=[
-            {"if": {"row_index": "odd"}, "backgroundColor": "rgb(1, 248, 248)"}
+            {"if": {"row_index": "odd"}, "backgroundColor": "rgb(240, 240, 230)"}
         ],
+        filter_action="native",
+        style_cell={"padding": "7px"},
     )
     return table
 
@@ -381,16 +382,7 @@ app.layout = dbc.Container(
                                                 )
                                             ]
                                         ),
-                                        dbc.Row(
-                                            [
-                                                dbc.Col(
-                                                    [
-                                                        html.Table(id="actor_table"),
-                                                        html.Br(),
-                                                    ],
-                                                )
-                                            ]
-                                        ),
+                                        dbc.Row([dbc.Col(id="actor_col")]),
                                     ]
                                 ),
                                 dbc.Col(
