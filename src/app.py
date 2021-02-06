@@ -185,7 +185,7 @@ def generate_button(id, text, width="50px", type="dark"):
 def generate_modal():
     modal = dbc.Modal(
         [
-            dbc.ModalHeader("Movey Maker"),
+            dbc.ModalHeader("Movey Money"),
             dbc.ModalBody(
                 dcc.Markdown(
                     """
@@ -255,8 +255,9 @@ app.layout = dbc.Container(
                         html.Div(
                             [
                                 html.H1(
-                                    "Movie Production Planner",
-                                )
+                                    "Movey Money",
+                                ),
+                                html.H5("A Movie Production Planning Dashboard"),
                             ],
                         )
                     ],
