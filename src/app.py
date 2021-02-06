@@ -193,6 +193,7 @@ def generate_button(id):
             "width": "50px",
             "display": "inline",
             "float": "right",
+            "font-weight": "800",
         },
     )
     return button
