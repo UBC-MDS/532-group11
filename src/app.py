@@ -5,7 +5,6 @@ import dash_html_components as html
 import dash_bootstrap_components as dbc
 from dash.dependencies import Input, Output
 import dash_table
-from Custom_Theme import mm
 
 # Core data science libraries
 import altair as alt
@@ -56,23 +55,31 @@ def plot_linechart(genres, years):
     filtered_data = data.query(
         "release_date >= @years[0] & release_date <= @years[1] & genres in @genres"
     )
-    filtered_data["budget_adj"] = filtered_data["budget_adj"] / 1000000
+    filtered_data.loc[:, "budget_adj"] = filtered_data["budget_adj"] / 1000000
     click = alt.selection_multi(fields=["genres"], bind="legend")
     chart = (
-        alt.Chart(filtered_data)
-        .mark_line(point=True)
-        .encode(
+        alt.Chart(filtered_data).mark_line(point=True).add_selection(click)
+    ).properties(width=600, height=350)
+
+    filtered_data.loc[:, "profit"] = filtered_data["profit"] / 1000000
+
+    return alt.hconcat(
+        chart.encode(
             alt.X("release_year", title="Release Year", axis=alt.Axis(format="y")),
             alt.Y("mean(budget_adj)", title="Adjusted Mean Budget (in million $)"),
             tooltip=["release_year", "mean(budget_adj)"],
             color=alt.Color("genres", title="Genre"),
             opacity=alt.condition(click, alt.value(0.9), alt.value(0.05)),
-        )
-        .configure_axis(grid=False)
-        .configure_view(strokeOpacity=0)
-        .add_selection(click)
-    ).properties(width=600, height=350)
-    return chart.to_html()
+        ),
+        chart.encode(
+            x=alt.X("month(release_date):O", title="Release Month"),
+            y=alt.Y("median(profit):Q", title="Adjusted Profit (in million $)"),
+            color=alt.Color("genres", title="Genre"),
+            opacity=alt.condition(click, alt.value(0.9), alt.value(0.05)),
+        ),
+    ).to_html()
+
+    # return chart.to_html()
 
 
 @app.callback(
@@ -84,7 +91,7 @@ def plot_profit_vs_year(genres, years):
     filtered_data = data.query(
         "release_date >= @years[0] & release_date <= @years[1] & genres in @genres"
     )
-    filtered_data["profit"] = filtered_data["profit"] / 1000000
+    filtered_data.loc[:, "profit"] = filtered_data["profit"] / 1000000
     click = alt.selection_multi(fields=["genres"], bind="legend")
     chart = (
         alt.Chart(filtered_data)
@@ -271,6 +278,11 @@ app.layout = dbc.Container(
                                 ),
                                 dbc.Col(
                                     [
+                                        # Hidden div to store current genre selection
+                                        html.Div(
+                                            id="genre-legend-selection",
+                                            style={"display": "none"},
+                                        ),
                                         html.Br(),
                                         html.Label(
                                             "Plan your release month",
