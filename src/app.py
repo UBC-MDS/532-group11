@@ -183,9 +183,9 @@ def generate_dash_table(selected_genre, years, budget):
     return table
 
 
-def generate_button(id):
+def generate_button(id, text):
     button = dbc.Button(
-        "?",
+        text,
         id=f"button-{id}",
         className="btn btn-info",
         outline=False,
@@ -236,18 +236,26 @@ def update_genres(genres):
 
 app.layout = dbc.Container(
     [
-        html.H1(
-            "Movie Production Planner",
-            style={
-                "backgroundColor": "#78c2ad",
-                "padding": 20,
-                "color": "white",
-                "margin-top": 20,
-                "margin-bottom": 20,
-                "text-align": "left",
-                "font-size": "48px",
-                "border-radius": 3,
-            },
+        dbc.Row(
+            [
+                dbc.Col(
+                    [
+                        html.H1(
+                            "Movie Production Planner",
+                            style={
+                                "backgroundColor": "#78c2ad",
+                                "padding": 20,
+                                "color": "white",
+                                "margin-top": 20,
+                                "margin-bottom": 20,
+                                "text-align": "left",
+                                "font-size": "48px",
+                                "border-radius": 3,
+                            },
+                        ),
+                    ]
+                )
+            ]
         ),
         html.Br(),
         dbc.Row(
@@ -332,7 +340,7 @@ app.layout = dbc.Container(
                                                             "Discover historical and recent financial trends".upper(),
                                                             style={"font-size": 17},
                                                         ),
-                                                        generate_button("1"),
+                                                        generate_button("1", text="?"),
                                                         dbc.Collapse(
                                                             html.P(
                                                                 """This section depicts trends for two very important financial indicators in the movie making business - namely budget and profit. 
@@ -385,7 +393,7 @@ app.layout = dbc.Container(
                                                             "Identify most-liked genres".upper(),
                                                             style={"font-size": 17},
                                                         ),
-                                                        generate_button("2"),
+                                                        generate_button("2", text="?"),
                                                         dbc.Collapse(
                                                             html.P(
                                                                 """
@@ -434,7 +442,7 @@ app.layout = dbc.Container(
                                                             "Find some potential actors".upper(),
                                                             style={"font-size": 17},
                                                         ),
-                                                        generate_button("3"),
+                                                        generate_button("3", text="?"),
                                                         dbc.Collapse(
                                                             html.P(
                                                                 """
