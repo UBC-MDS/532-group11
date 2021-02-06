@@ -3,21 +3,88 @@ import dash
 import dash_core_components as dcc
 import dash_html_components as html
 import dash_bootstrap_components as dbc
-from dash.dependencies import Input, Output
+from dash.dependencies import Input, Output, State
+import dash_table
 
 # Core data science libraries
 import altair as alt
 import pandas as pd
-import random
 
 # Data loading functions
 from data import read_data
 
 
-app = dash.Dash(external_stylesheets=[dbc.themes.BOOTSTRAP])
+app = dash.Dash(__name__, external_stylesheets=[dbc.themes.MINTY], title="Movey Money")
 
 server = app.server
 data = read_data()
+
+alt.themes.enable("fivethirtyeight")
+
+
+@app.callback(
+    Output("linechart", "srcDoc"),
+    Input("genres", "value"),
+    Input("years", "value"),
+)
+def plot_linechart(genres, years):
+    filtered_data = data.query(
+        "release_date >= @years[0] & release_date <= @years[1] & genres in @genres"
+    )
+    filtered_data.loc[:, "budget_adj"] = filtered_data.loc[:, "budget_adj"] / 1000000
+    filtered_data.loc[:, "profit"] = filtered_data.loc[:, "profit"] / 1000000
+    click = alt.selection_multi(fields=["genres"], bind="legend")
+    chart = (alt.Chart(filtered_data).mark_point().add_selection(click)).properties(
+        width=600, height=350
+    )
+
+    first_chart = (
+        chart.encode(
+            alt.X(
+                "release_year",
+                title="Release Year",
+                axis=alt.Axis(format="y", grid=False),
+            ),
+            alt.Y(
+                "budget_adj",
+                title="Budget (in million $)",
+                axis=alt.Axis(grid=False),
+            ),
+            color=alt.Color(
+                "genres", title="Genre", legend=alt.Legend(labelFontSize=17)
+            ),
+            opacity=alt.condition(click, alt.value(0.9), alt.value(0.05)),
+        )
+        .transform_loess(
+            loess="budget_adj",
+            on="release_year",
+            groupby=["genres"],
+            bandwidth=0.35,
+        )
+        .mark_line()
+    )
+
+    second_chart = (
+        chart.encode(
+            x=alt.X(
+                "release_month",
+                title="Release Month",
+                axis=alt.Axis(grid=False),
+            ),
+            y=alt.Y(
+                "profit",
+                title="Profit (in million $)",
+                axis=alt.Axis(grid=False),
+            ),
+            color=alt.Color("genres", title="Genre"),
+            opacity=alt.condition(click, alt.value(0.9), alt.value(0.05)),
+        )
+        .transform_loess("release_month", "profit", groupby=["genres"], bandwidth=0.35)
+        .mark_line()
+    )
+    return (
+        alt.hconcat(first_chart, second_chart).configure_view(strokeOpacity=0).to_html()
+    )
 
 
 @app.callback(
@@ -31,51 +98,26 @@ def plot_heatmap(genres, years):
     )
     alt.data_transformers.disable_max_rows()
     chart = (
-        alt.Chart(filtered_data, title="Vote Average by Genre")
+        alt.Chart(filtered_data)
         .mark_rect()
         .encode(
-            x=alt.X("vote_average", bin=alt.Bin(maxbins=40), title="Vote Average"),
+            x=alt.X("vote_average", bin=alt.Bin(maxbins=11), title="Vote Average"),
             y=alt.Y("genres", title=""),
             color=alt.Color("count()", title="Count"),
             tooltip="count()",
         )
-    ).properties(width=350, height=300)
+    ).properties(width=450, height=350)
     return chart.to_html()
 
 
 @app.callback(
-    Output("linechart", "srcDoc"),
-    Input("genres", "value"),
-    Input("years", "value"),
-)
-def plot_linechart(genres, years):
-    filtered_data = data.query(
-        "release_date >= @years[0] & release_date <= @years[1] & genres in @genres"
-    )
-    click = alt.selection_multi(fields=["genres"], bind="legend")
-    chart = (
-        alt.Chart(filtered_data, title="Mean Budget by Release Year")
-        .mark_line(point=True)
-        .encode(
-            alt.X("release_year", title="Release Year"),
-            alt.Y("mean(budget_adj)", title="Adjusted Mean Budget ($)"),
-            tooltip=["release_year", "mean(budget_adj)"],
-            color=alt.Color("genres", title="Genre"),
-            opacity=alt.condition(click, alt.value(0.9), alt.value(0.05)),
-        )
-        .add_selection(click)
-    ).properties(width=280, height=350)
-    return chart.to_html()
-
-
-@app.callback(
-    Output("actor_table", "children"),
+    Output("actor_col", "children"),
     Input("genres_drill", "value"),
     Input("years", "value"),
     Input("budget", "value"),
 )
-def generate_actor_table(selected_genre, years, budget):
-    print(budget)
+def generate_dash_table(selected_genre, years, budget):
+
     filtered_data = data.query(
         "release_date >= @years[0] & release_date <= @years[1] & genres == @selected_genre & budget_adj >= @budget[0] & budget_adj <= @budget[1]"
     )
@@ -85,56 +127,111 @@ def generate_actor_table(selected_genre, years, budget):
     )
     top_actors.index.names = ["actor"]
     top_actors.reset_index(inplace=True)
-    link = list()
-    for i in range(len(top_actors)):
-        link.append("https://en.wikipedia.org/wiki/" + top_actors.iloc[i]["actor"].replace(" ", "_"))
-    top_actors["link"] = link
-    return (
-        html.Thead(
-            html.Tr(
-                children=[
-                    html.Th("Actor"),
-                    html.Th("# of matching movies they starred in"),
-                ]
-            )
-        ),
-        html.Tbody(
-            [
-                html.Tr(
-                    children=[html.A(data[0], href=data[2], target="_blank"), html.Td(html.Br()), html.Td(data[1])]
-                )
-                for data in top_actors[["actor", "count", "link"]][1:6].values
-            ]
-        ),
+    table = dash_table.DataTable(
+        id="actorDataTable",
+        columns=[
+            {
+                "name": "Actor Name",
+                "id": "actor",
+                "selectable": False,
+            },
+            {
+                "name": "Count",
+                "id": "count",
+                "selectable": False,
+            },
+        ],
+        cell_selectable=False,
+        data=top_actors.to_dict("records"),
+        page_size=5,
+        style_header={
+            "backgroundColor": "rgb(230, 230, 230)",
+            "fontWeight": "bold",
+            "class": "table",
+            "color": "#343a40",
+        },
+        style_data_conditional=[
+            {
+                "if": {"row_index": "odd"},
+                "backgroundColor": "#78c2ad",
+                "color": "#343a40",
+            }
+        ],
+        style_cell={
+            "padding": "7px",
+            "color": "white",
+            "backgroundColor": "#454d55",
+        },
     )
+    return table
+
+
+def generate_button(id, text, width="50px", type="dark"):
+    button = dbc.Button(
+        text,
+        id=f"button-{id}",
+        className="btn btn-info" if type == "dark" else "btn btn-light",
+        outline=False,
+        style={
+            "width": width,
+            "display": "inline",
+            "float": "right",
+            "font-weight": "800",
+        },
+    )
+    return button
+
+
+def generate_modal():
+    modal = dbc.Modal(
+        [
+            dbc.ModalHeader("Movey Maker"),
+            dbc.ModalBody(
+                dcc.Markdown(
+                    """
+            This data visualization app aims at helping movie producers plan their next release. 
+            The app contains key visualizations showing the financial trends, popularity metrics, as well as an actor selection widgets in order to help decision-makers identify factors that contribute to these key aspects. For more information please see the [detailed project proposal](https://github.com/UBC-MDS/532-group11/blob/main/proposal.md).
+            """
+                )
+            ),
+            dbc.ModalFooter(
+                dbc.Button("Close", id="close-button-0", className="ml-auto")
+            ),
+        ],
+        id="modal",
+    )
+    return modal
 
 
 @app.callback(
-    Output("profit_year", "srcDoc"),
-    Input("genres", "value"),
-    Input("years", "value"),
+    Output("modal", "is_open"),
+    Output("collapse-1", "is_open"),
+    Output("collapse-2", "is_open"),
+    Output("collapse-3", "is_open"),
+    [Input("button-0", "n_clicks")],
+    [Input("close-button-0", "n_clicks")],
+    [Input("button-1", "n_clicks")],
+    [Input("button-2", "n_clicks")],
+    [Input("button-3", "n_clicks")],
+    [State("modal", "is_open")],
+    [State("collapse-1", "is_open")],
+    [State("collapse-2", "is_open")],
+    [State("collapse-3", "is_open")],
 )
-def plot_profit_vs_year(genres, years):
-    filtered_data = data.query(
-        "release_date >= @years[0] & release_date <= @years[1] & genres in @genres"
-    )
-    click = alt.selection_multi(fields=["genres"], bind="legend")
-    chart = (
-        alt.Chart(filtered_data, title="Median Profit by Release Month")
-        .mark_line(point=True)
-        .encode(
-            x=alt.X("month(release_date):O", title="Release Month"),
-            y=alt.Y("median(profit):Q", title="Adjusted Profit ($)"),
-            color=alt.Color("genres", title="Genre"),
-            opacity=alt.condition(click, alt.value(0.9), alt.value(0.05)),
-        )
-        .add_selection(click)
-    ).properties(width=280, height=350)
-    return chart.to_html()
-
-
-def init_genres():
-    return random.sample(list(data["genres"].unique()), 6)
+def toggle_collapse(n0, n0c, n1, n2, n3, is_open0, is_open1, is_open2, is_open3):
+    changed_id = [p["prop_id"] for p in dash.callback_context.triggered][0]
+    if "button-0" in changed_id:
+        return (not is_open0, is_open1, is_open2, is_open3)
+    elif "close-button-0" in changed_id:
+        return (not is_open0, is_open1, is_open2, is_open3)
+    elif "button-1" in changed_id:
+        return (is_open0, not is_open1, is_open2, is_open3)
+    elif "button-2" in changed_id:
+        return (is_open0, is_open1, not is_open2, is_open3)
+    elif "button-3" in changed_id:
+        return (is_open0, is_open1, is_open2, not is_open3)
+    else:
+        return (is_open0, is_open1, is_open2, is_open3)
 
 
 @app.callback(
@@ -151,7 +248,38 @@ def update_genres(genres):
 
 app.layout = dbc.Container(
     [
-        html.H1("Movie Production Planner"),
+        dbc.Row(
+            [
+                dbc.Col(
+                    [
+                        html.Div(
+                            [
+                                html.H1(
+                                    "Movie Production Planner",
+                                )
+                            ],
+                        )
+                    ],
+                ),
+                dbc.Col(
+                    [
+                        generate_button(
+                            "0", text="LEARN MORE", width="150px", type="Main"
+                        ),
+                        generate_modal(),
+                    ]
+                ),
+            ],
+            style={
+                "backgroundColor": "#78c2ad",
+                "padding": 20,
+                "margin-top": 0,
+                "margin-bottom": 10,
+                "text-align": "left",
+                "font-size": "48px",
+                "border-radius": 5,
+            },
+        ),
         html.Br(),
         dbc.Row(
             [
@@ -163,13 +291,19 @@ app.layout = dbc.Container(
                             ]
                         ),
                         dcc.RangeSlider(
+                            className="slider_class",
                             id="years",
                             count=1,
                             step=1,
                             min=data["release_year"].min(),
                             max=data["release_year"].max(),
                             value=[2000, 2016],
-                            marks={1960: "1960", 2015: "2015"},
+                            marks={
+                                1960: {
+                                    "label": "1960",
+                                },
+                                2015: {"label": "2015"},
+                            },
                             tooltip={"always_visible": False, "placement": "top"},
                         ),
                     ],
@@ -190,7 +324,13 @@ app.layout = dbc.Container(
                                         {"label": col, "value": col}
                                         for col in data["genres"].unique()
                                     ],
-                                    value=init_genres(),
+                                    value=[
+                                        "Action",
+                                        "Drama",
+                                        "Adventure",
+                                        "Family",
+                                        "Animation",
+                                    ],
                                     multi=True,
                                 ),
                             ]
@@ -215,36 +355,50 @@ app.layout = dbc.Container(
                             [
                                 dbc.Col(
                                     [
-                                        html.Br(),
-                                        html.Label(
-                                            "Identify most-liked genres",
-                                            style={"font-size": 20},
-                                        ),
-                                        html.Iframe(
-                                            id="heatmap",
+                                        dbc.Card(
+                                            [
+                                                dbc.CardHeader(
+                                                    [
+                                                        html.Label(
+                                                            "Discover historical and recent financial trends".upper(),
+                                                            style={"font-size": 17},
+                                                        ),
+                                                        generate_button("1", text="?"),
+                                                        dbc.Collapse(
+                                                            html.P(
+                                                                """This section depicts trends for two very important financial indicators in the movie making business - namely budget and profit. 
+                                                                The plot on the left shows how budgets have changed over the years while the plot on the right can be used 
+                                                                to explore how release month might be related to the success of a movie based on profits. Lines are estimated using LOESS regression.""",
+                                                                style={
+                                                                    "font-size": "13px"
+                                                                },
+                                                            ),
+                                                            id="collapse-1",
+                                                        ),
+                                                    ]
+                                                ),
+                                                dbc.CardBody(
+                                                    [
+                                                        html.Iframe(
+                                                            id="linechart",
+                                                            style={
+                                                                "display": "block",
+                                                                "overflow": " hidden",
+                                                                "margin": "auto",
+                                                                "border-width": "0",
+                                                                "width": "1550px",
+                                                                "height": "500px",
+                                                            },
+                                                        ),
+                                                    ]
+                                                ),
+                                            ],
                                             style={
-                                                "border-width": "0",
-                                                "width": "100%",
                                                 "height": "100%",
+                                                "margin-left": "15px",
+                                                "background": "#f0f0f0",
                                             },
-                                        ),
-                                    ]
-                                ),
-                                dbc.Col(
-                                    [
-                                        html.Br(),
-                                        html.Label(
-                                            "Discover historical and recent budget trends",
-                                            style={"font-size": 20},
-                                        ),
-                                        html.Iframe(
-                                            id="linechart",
-                                            style={
-                                                "border-width": "0",
-                                                "width": "100%",
-                                                "height": "500px",
-                                            },
-                                        ),
+                                        )
                                     ]
                                 ),
                             ]
@@ -254,102 +408,178 @@ app.layout = dbc.Container(
                             [
                                 dbc.Col(
                                     [
-                                        html.Br(),
-                                        html.Label(
-                                            "Find some potential actors",
-                                            style={"font-size": 20},
-                                        ),
-                                        dbc.Row(
+                                        dbc.Card(
                                             [
-                                                dbc.Col(
-                                                    html.Label(
-                                                        [
-                                                            "1. Drill down on a specific genre",
-                                                            dcc.Dropdown(
-                                                                id="genres_drill",
-                                                                multi=False,
+                                                dbc.CardHeader(
+                                                    [
+                                                        html.Label(
+                                                            "Identify most-liked genres".upper(),
+                                                            style={"font-size": 17},
+                                                        ),
+                                                        generate_button("2", text="?"),
+                                                        dbc.Collapse(
+                                                            html.P(
+                                                                """
+                                                                This plot can help identify which type of movies are well-received by viewers 
+                                                                based on user-submitted ratings.
+                                                                """,
                                                                 style={
-                                                                    "width": "200px"
+                                                                    "font-size": "13px"
                                                                 },
                                                             ),
-                                                        ]
-                                                    ),
-                                                )
-                                            ]
-                                        ),
-                                        dbc.Row(
-                                            [
-                                                dbc.Col(
-                                                    [
-                                                        html.Label(
-                                                            [
-                                                                "2. Narrow down your budget"
-                                                            ]
-                                                        ),
-                                                        dcc.RangeSlider(
-                                                            id="budget",
-                                                            count=1,
-                                                            step=1,
-                                                            min=data[
-                                                                "budget_adj"
-                                                            ].min(),
-                                                            max=data[
-                                                                "budget_adj"
-                                                            ].max(),
-                                                            value=[0, 425000000],
-                                                            marks={
-                                                                0.99: "0",
-                                                                425000000: "425,000,000",
-                                                            },
-                                                            tooltip={
-                                                                "always_visible": False,
-                                                                "placement": "top",
-                                                            },
+                                                            id="collapse-2",
                                                         ),
                                                     ],
-                                                    style={"width": "100px"},
-                                                )
-                                            ]
-                                        ),
-                                        dbc.Row(
-                                            [
-                                                dbc.Col(
+                                                ),
+                                                dbc.CardBody(
                                                     [
-                                                        html.Label(
-                                                            ["3. Select an actor!"]
-                                                        )
+                                                        html.Iframe(
+                                                            id="heatmap",
+                                                            style={
+                                                                "display": "block",
+                                                                "overflow": " hidden",
+                                                                "margin": "auto",
+                                                                "height": "110%",
+                                                                "width": "690px",
+                                                                "border-width": "0",
+                                                            },
+                                                        ),
                                                     ]
-                                                )
-                                            ]
-                                        ),
-                                        dbc.Row(
-                                            [
-                                                dbc.Col(
-                                                    [
-                                                        html.Table(id="actor_table"),
-                                                        html.Br(),
-                                                    ]
-                                                )
-                                            ]
-                                        ),
+                                                ),
+                                            ],
+                                            style={
+                                                "height": "100%",
+                                                "margin": "15px 15px 15px 15px",
+                                                "background": "#f0f0f0",
+                                            },
+                                        )
                                     ]
                                 ),
                                 dbc.Col(
                                     [
-                                        html.Br(),
-                                        html.Label(
-                                            "Plan your release month",
-                                            style={"font-size": 20},
-                                        ),
-                                        html.Iframe(
-                                            id="profit_year",
+                                        dbc.Card(
+                                            [
+                                                dbc.CardHeader(
+                                                    [
+                                                        html.Label(
+                                                            "Find some potential actors".upper(),
+                                                            style={"font-size": 17},
+                                                        ),
+                                                        generate_button("3", text="?"),
+                                                        dbc.Collapse(
+                                                            html.P(
+                                                                """
+                                                                This widget can help identify suitable actors for a potential movie in a given genre with a specific budget range in mind. 
+                                                                The table suggests potential actors ranked based on the actor's experience in movies matching the specified criteria. 
+                                                                Specifically, "Count" represents the number of matching movies in the database that the given actor has starred in.
+                                                                """,
+                                                                style={
+                                                                    "font-size": "13px"
+                                                                },
+                                                            ),
+                                                            id="collapse-3",
+                                                        ),
+                                                    ],
+                                                ),
+                                                dbc.CardBody(
+                                                    [
+                                                        dbc.Row(
+                                                            [
+                                                                dbc.Col(
+                                                                    html.Label(
+                                                                        [
+                                                                            "Drill down on a specific genre",
+                                                                            dcc.Dropdown(
+                                                                                id="genres_drill",
+                                                                                multi=False,
+                                                                                style={
+                                                                                    "width": "200px"
+                                                                                },
+                                                                            ),
+                                                                        ],
+                                                                        style={
+                                                                            "font-size": 13
+                                                                        },
+                                                                    ),
+                                                                )
+                                                            ]
+                                                        ),
+                                                        dbc.Row(
+                                                            [
+                                                                dbc.Col(
+                                                                    [
+                                                                        html.Label(
+                                                                            [
+                                                                                "Narrow down your budget"
+                                                                            ],
+                                                                            style={
+                                                                                "font-size": 13
+                                                                            },
+                                                                        ),
+                                                                        dcc.RangeSlider(
+                                                                            id="budget",
+                                                                            count=1,
+                                                                            step=5000000,
+                                                                            min=data[
+                                                                                "budget_adj"
+                                                                            ].min(),
+                                                                            max=data[
+                                                                                "budget_adj"
+                                                                            ].max(),
+                                                                            value=[
+                                                                                0,
+                                                                                425000000,
+                                                                            ],
+                                                                            marks={
+                                                                                0.99: "$0",
+                                                                                425000000: "$425 million",
+                                                                            },
+                                                                            tooltip={
+                                                                                "always_visible": False,
+                                                                                "placement": "top",
+                                                                            },
+                                                                        ),
+                                                                    ],
+                                                                    md=5,
+                                                                    style={
+                                                                        "width": "100px"
+                                                                    },
+                                                                )
+                                                            ]
+                                                        ),
+                                                        dbc.Row(
+                                                            [
+                                                                dbc.Col(
+                                                                    [
+                                                                        html.Label(
+                                                                            [
+                                                                                "Discover some suitable actors!"
+                                                                            ],
+                                                                            style={
+                                                                                "font-size": 13
+                                                                            },
+                                                                        )
+                                                                    ]
+                                                                )
+                                                            ]
+                                                        ),
+                                                        dbc.Row(
+                                                            [
+                                                                dbc.Col(
+                                                                    id="actor_col", md=5
+                                                                )
+                                                            ]
+                                                        ),
+                                                    ],
+                                                ),
+                                            ],
                                             style={
-                                                "border-width": "0",
-                                                "width": "100%",
-                                                "height": "450px",
+                                                "height": "100%",
+                                                "margin-top": "15px",
+                                                "background": "#f0f0f0",
                                             },
-                                        ),
-                                    ]
+                                        )
+                                    ],
                                 ),
                             ]
                         ),
@@ -358,15 +588,20 @@ app.layout = dbc.Container(
                     style={
                         "width": "100%",
                         "height": "100%",
-                        "border": "1px solid #d3d3d3",
-                        "border-radius": "10px",
                     },
                 )
             ]
         ),
+        html.Br(),
+        html.Hr(),
+        dcc.Markdown(
+            "This dashboard was created by Yazan Saleh, Rahul Kuriyedath, and Yanhua Chen. You can find the source code on [GitHub](https://github.com/UBC-MDS/532-group11). The data was provided by [The Movie Database (TMDB)](https://www.themoviedb.org/?language=en-CA) and was sourced from [Kaggle](https://www.kaggle.com/juzershakir/tmdb-movies-dataset). This project is released under the [MIT License](https://github.com/UBC-MDS/532-group11/blob/main/LICENSE)"
+        ),
     ],
+    fluid=True,
+    style={"background": "#f0f0f0"},
 )
 
 
 if __name__ == "__main__":
-    app.run_server(debug=True)
+    app.run_server(debug=False)
