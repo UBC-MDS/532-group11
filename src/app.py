@@ -357,6 +357,7 @@ app.layout = dbc.Container(
                                                             },
                                                         ),
                                                     ],
+                                                    md=5,
                                                     style={"width": "100px"},
                                                 )
                                             ]
@@ -372,13 +373,7 @@ app.layout = dbc.Container(
                                                 )
                                             ]
                                         ),
-                                        dbc.Row(
-                                            [
-                                                dbc.Col(
-                                                    id="actor_col",
-                                                )
-                                            ]
-                                        ),
+                                        dbc.Row([dbc.Col(id="actor_col", md=5)]),
                                     ],
                                 ),
                             ]
