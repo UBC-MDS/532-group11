@@ -47,11 +47,10 @@ def plot_linechart(genres, years):
                 axis=alt.Axis(format="y", grid=False),
             ),
             alt.Y(
-                "mean(budget_adj)",
+                "budget_adj",
                 title="Budget (in million $)",
                 axis=alt.Axis(grid=False),
             ),
-            tooltip=["release_year", "mean(budget_adj)"],
             color=alt.Color(
                 "genres", title="Genre", legend=alt.Legend(labelFontSize=17)
             ),
@@ -74,7 +73,7 @@ def plot_linechart(genres, years):
                 axis=alt.Axis(grid=False),
             ),
             y=alt.Y(
-                "mean(profit):Q",
+                "profit",
                 title="Profit (in million $)",
                 axis=alt.Axis(grid=False),
             ),
