@@ -130,6 +130,14 @@ def generate_dash_table(selected_genre, years, budget):
     )
     top_actors.index.names = ["actor"]
     top_actors.reset_index(inplace=True)
+    link = list()
+    for i in range(len(top_actors)):
+        url = "https://en.wikipedia.org/wiki/" + top_actors.iloc[i]["actor"].replace(
+            " ", "_"
+        )
+        markdown_link = f"[{top_actors.iloc[i]['actor']}](" + str(url) + ")"
+        link.append(markdown_link)
+    top_actors["link"] = link
     table = dash_table.DataTable(
         id="actorDataTable",
         columns=[
@@ -141,6 +149,13 @@ def generate_dash_table(selected_genre, years, budget):
             {
                 "name": "Count",
                 "id": "count",
+                "selectable": False,
+            },
+            {
+                "name": "Link",
+                "id": "link",
+                "type": "text",
+                "presentation": "markdown",
                 "selectable": False,
             },
         ],
@@ -164,28 +179,8 @@ def generate_dash_table(selected_genre, years, budget):
             "padding": "7px",
             "color": "white",
             "backgroundColor": "#454d55",
+            "className": "cell-markdown",
         },
-    link = list()
-    for i in range(len(top_actors)):
-        link.append("https://en.wikipedia.org/wiki/" + top_actors.iloc[i]["actor"].replace(" ", "_"))
-    top_actors["link"] = link
-    return (
-        html.Thead(
-            html.Tr(
-                children=[
-                    html.Th("Actor"),
-                    html.Th("# of matching movies they starred in"),
-                ]
-            )
-        ),
-        html.Tbody(
-            [
-                html.Tr(
-                    children=[html.A(data[0], href=data[2], target="_blank"), html.Td(html.Br()), html.Td(data[1])]
-                )
-                for data in top_actors[["actor", "count", "link"]][1:6].values
-            ]
-        ),
     )
     return table
 
