@@ -3,7 +3,7 @@ import dash
 import dash_core_components as dcc
 import dash_html_components as html
 import dash_bootstrap_components as dbc
-from dash.dependencies import Input, Output
+from dash.dependencies import Input, Output, State
 import dash_table
 
 # Core data science libraries
@@ -186,7 +186,7 @@ def generate_dash_table(selected_genre, years, budget):
 def generate_button(id):
     button = dbc.Button(
         "?",
-        id=id,
+        id=f"button-{id}",
         className="btn btn-info",
         outline=False,
         style={
@@ -197,6 +197,29 @@ def generate_button(id):
         },
     )
     return button
+
+
+@app.callback(
+    Output("collapse-1", "is_open"),
+    Output("collapse-2", "is_open"),
+    Output("collapse-3", "is_open"),
+    [Input("button-1", "n_clicks")],
+    [Input("button-2", "n_clicks")],
+    [Input("button-3", "n_clicks")],
+    [State("collapse-1", "is_open")],
+    [State("collapse-2", "is_open")],
+    [State("collapse-3", "is_open")],
+)
+def toggle_collapse(n1, n2, n3, is_open1, is_open2, is_open3):
+    changed_id = [p["prop_id"] for p in dash.callback_context.triggered][0]
+    if "button-1" in changed_id:
+        return (not is_open1, is_open2, is_open3)
+    elif "button-2" in changed_id:
+        return (is_open1, not is_open2, is_open3)
+    elif "button-3" in changed_id:
+        return (is_open1, is_open2, not is_open3)
+    else:
+        return (is_open1, is_open2, is_open3)
 
 
 @app.callback(
@@ -310,6 +333,15 @@ app.layout = dbc.Container(
                                                             style={"font-size": 17},
                                                         ),
                                                         generate_button("1"),
+                                                        dbc.Collapse(
+                                                            html.P(
+                                                                "This content is hidden in the collapse",
+                                                                style={
+                                                                    "font-size": "13px"
+                                                                },
+                                                            ),
+                                                            id="collapse-1",
+                                                        ),
                                                     ]
                                                 ),
                                                 dbc.CardBody(
@@ -352,6 +384,15 @@ app.layout = dbc.Container(
                                                             style={"font-size": 17},
                                                         ),
                                                         generate_button("2"),
+                                                        dbc.Collapse(
+                                                            html.P(
+                                                                "This content is hidden in the collapse",
+                                                                style={
+                                                                    "font-size": "13px"
+                                                                },
+                                                            ),
+                                                            id="collapse-2",
+                                                        ),
                                                     ],
                                                 ),
                                                 dbc.CardBody(
@@ -389,6 +430,15 @@ app.layout = dbc.Container(
                                                             style={"font-size": 17},
                                                         ),
                                                         generate_button("3"),
+                                                        dbc.Collapse(
+                                                            html.P(
+                                                                "This content is hidden in the collapse",
+                                                                style={
+                                                                    "font-size": "13px"
+                                                                },
+                                                            ),
+                                                            id="collapse-3",
+                                                        ),
                                                     ],
                                                 ),
                                                 dbc.CardBody(
