@@ -233,8 +233,6 @@ def update_genres(genres):
         options_list.append({"label": item, "value": item})
     return (options_list, options_list[0]["label"])
 
-    #                  generate_button("0", text="LEARN MORE"),
-
 
 app.layout = dbc.Container(
     [
