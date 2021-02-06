@@ -164,6 +164,27 @@ def generate_dash_table(selected_genre, years, budget):
             "color": "white",
             "backgroundColor": "#454d55",
         },
+    link = list()
+    for i in range(len(top_actors)):
+        link.append("https://en.wikipedia.org/wiki/" + top_actors.iloc[i]["actor"].replace(" ", "_"))
+    top_actors["link"] = link
+    return (
+        html.Thead(
+            html.Tr(
+                children=[
+                    html.Th("Actor"),
+                    html.Th("# of matching movies they starred in"),
+                ]
+            )
+        ),
+        html.Tbody(
+            [
+                html.Tr(
+                    children=[html.A(data[0], href=data[2], target="_blank"), html.Td(html.Br()), html.Td(data[1])]
+                )
+                for data in top_actors[["actor", "count", "link"]][1:6].values
+            ]
+        ),
     )
     return table
 
