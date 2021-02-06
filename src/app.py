@@ -358,75 +358,100 @@ app.layout = dbc.Container(
                                 ),
                                 dbc.Col(
                                     [
-                                        html.Label(
-                                            "Find some potential actors",
-                                            style={"font-size": 20},
-                                        ),
-                                        dbc.Row(
+                                        dbc.Card(
                                             [
-                                                dbc.Col(
-                                                    html.Label(
-                                                        [
-                                                            "1. Drill down on a specific genre",
-                                                            dcc.Dropdown(
-                                                                id="genres_drill",
-                                                                multi=False,
-                                                                style={
-                                                                    "width": "200px"
-                                                                },
-                                                            ),
-                                                        ]
-                                                    ),
-                                                )
-                                            ]
-                                        ),
-                                        dbc.Row(
-                                            [
-                                                dbc.Col(
+                                                dbc.CardHeader(
                                                     [
                                                         html.Label(
+                                                            "Find some potential actors",
+                                                            style={"font-size": 20},
+                                                        ),
+                                                    ]
+                                                ),
+                                                dbc.CardBody(
+                                                    [
+                                                        dbc.Row(
                                                             [
-                                                                "2. Narrow down your budget"
+                                                                dbc.Col(
+                                                                    html.Label(
+                                                                        [
+                                                                            "1. Drill down on a specific genre",
+                                                                            dcc.Dropdown(
+                                                                                id="genres_drill",
+                                                                                multi=False,
+                                                                                style={
+                                                                                    "width": "200px"
+                                                                                },
+                                                                            ),
+                                                                        ]
+                                                                    ),
+                                                                )
                                                             ]
                                                         ),
-                                                        dcc.RangeSlider(
-                                                            id="budget",
-                                                            count=1,
-                                                            step=5000000,
-                                                            min=data[
-                                                                "budget_adj"
-                                                            ].min(),
-                                                            max=data[
-                                                                "budget_adj"
-                                                            ].max(),
-                                                            value=[0, 425000000],
-                                                            marks={
-                                                                0.99: "$0",
-                                                                425000000: "$425 million",
-                                                            },
-                                                            tooltip={
-                                                                "always_visible": False,
-                                                                "placement": "top",
-                                                            },
+                                                        dbc.Row(
+                                                            [
+                                                                dbc.Col(
+                                                                    [
+                                                                        html.Label(
+                                                                            [
+                                                                                "2. Narrow down your budget"
+                                                                            ]
+                                                                        ),
+                                                                        dcc.RangeSlider(
+                                                                            id="budget",
+                                                                            count=1,
+                                                                            step=5000000,
+                                                                            min=data[
+                                                                                "budget_adj"
+                                                                            ].min(),
+                                                                            max=data[
+                                                                                "budget_adj"
+                                                                            ].max(),
+                                                                            value=[
+                                                                                0,
+                                                                                425000000,
+                                                                            ],
+                                                                            marks={
+                                                                                0.99: "$0",
+                                                                                425000000: "$425 million",
+                                                                            },
+                                                                            tooltip={
+                                                                                "always_visible": False,
+                                                                                "placement": "top",
+                                                                            },
+                                                                        ),
+                                                                    ],
+                                                                    md=5,
+                                                                    style={
+                                                                        "width": "100px"
+                                                                    },
+                                                                )
+                                                            ]
                                                         ),
-                                                    ],
-                                                    md=5,
-                                                    style={"width": "100px"},
-                                                )
-                                            ]
-                                        ),
-                                        dbc.Row(
-                                            [
-                                                dbc.Col(
-                                                    [
-                                                        html.Label(
-                                                            ["3. Select an actor!"]
-                                                        )
+                                                        dbc.Row(
+                                                            [
+                                                                dbc.Col(
+                                                                    [
+                                                                        html.Label(
+                                                                            [
+                                                                                "3. Select an actor!"
+                                                                            ]
+                                                                        )
+                                                                    ]
+                                                                )
+                                                            ]
+                                                        ),
+                                                        dbc.Row(
+                                                            [
+                                                                dbc.Col(
+                                                                    id="actor_col", md=5
+                                                                )
+                                                            ]
+                                                        ),
                                                     ]
-                                                )
+                                                ),
                                             ]
-                                        ),
-                                        dbc.Row([dbc.Col(id="actor_col", md=5)]),
+                                        )
                                     ],
                                 ),
                             ]
