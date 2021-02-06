@@ -43,12 +43,12 @@ def plot_linechart(genres, years):
         chart.encode(
             alt.X(
                 "release_year",
-                title="Release Year",
+                title="Release Year".upper(),
                 axis=alt.Axis(format="y", grid=False),
             ),
             alt.Y(
                 "budget_adj",
-                title="Budget (in million $)",
+                title="Budget (in million $)".upper(),
                 axis=alt.Axis(grid=False),
             ),
             color=alt.Color(
@@ -69,12 +69,12 @@ def plot_linechart(genres, years):
         chart.encode(
             x=alt.X(
                 "release_month",
-                title="Release Month",
+                title="Release Month".upper(),
                 axis=alt.Axis(grid=False),
             ),
             y=alt.Y(
                 "profit",
-                title="Profit (in million $)",
+                title="Profit (in million $)".upper(),
                 axis=alt.Axis(grid=False),
             ),
             color=alt.Color("genres", title="Genre"),
@@ -102,7 +102,9 @@ def plot_heatmap(genres, years):
         alt.Chart(filtered_data)
         .mark_rect()
         .encode(
-            x=alt.X("vote_average", bin=alt.Bin(maxbins=11), title="Vote Average"),
+            x=alt.X(
+                "vote_average", bin=alt.Bin(maxbins=11), title="Vote Average".upper()
+            ),
             y=alt.Y("genres", title=""),
             color=alt.Color("count()", title="Count"),
             tooltip="count()",
