@@ -85,6 +85,10 @@ def generate_actor_table(selected_genre, years, budget):
     )
     top_actors.index.names = ["actor"]
     top_actors.reset_index(inplace=True)
+    link = list()
+    for i in range(len(top_actors)):
+        link.append("https://en.wikipedia.org/wiki/" + top_actors.iloc[i]["actor"].replace(" ", "_"))
+    top_actors["link"] = link
     return (
         html.Thead(
             html.Tr(
@@ -97,9 +101,9 @@ def generate_actor_table(selected_genre, years, budget):
         html.Tbody(
             [
                 html.Tr(
-                    children=[html.Td(data[0]), html.Td(html.Br()), html.Td(data[1])]
+                    children=[html.A(data[0], href=data[2], target="_blank"), html.Td(html.Br()), html.Td(data[1])]
                 )
-                for data in top_actors[["actor", "count"]][1:6].values
+                for data in top_actors[["actor", "count", "link"]][1:6].values
             ]
         ),
     )
