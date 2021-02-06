@@ -134,14 +134,15 @@ def generate_dash_table(selected_genre, years, budget):
             {
                 "name": "Actor Name",
                 "id": "actor",
-                "selectable": True,
+                "selectable": False,
             },
             {
                 "name": "Count",
                 "id": "count",
-                "selectable": True,
+                "selectable": False,
             },
         ],
+        cell_selectable=False,
         data=top_actors.to_dict("records"),
         page_size=5,
         style_header={
@@ -284,7 +285,7 @@ app.layout = dbc.Container(
                                                 "overflow": " hidden",
                                                 "margin": "auto",
                                                 "border-width": "0",
-                                                "width": "1500px",
+                                                "width": "1550px",
                                                 "height": "500px",
                                             },
                                         ),
@@ -297,7 +298,6 @@ app.layout = dbc.Container(
                             [
                                 dbc.Col(
                                     [
-                                        html.Br(),
                                         html.Label(
                                             "Identify most-liked genres",
                                             style={"font-size": 20},
@@ -309,7 +309,7 @@ app.layout = dbc.Container(
                                                 "overflow": " hidden",
                                                 "margin": "auto",
                                                 "height": "100%",
-                                                "width": "650px",
+                                                "width": "690px",
                                                 "border-width": "0",
                                             },
                                         ),
@@ -317,7 +317,6 @@ app.layout = dbc.Container(
                                 ),
                                 dbc.Col(
                                     [
-                                        html.Br(),
                                         html.Label(
                                             "Find some potential actors",
                                             style={"font-size": 20},
