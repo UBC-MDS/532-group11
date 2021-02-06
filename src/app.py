@@ -15,7 +15,7 @@ import random
 from data import read_data
 
 
-app = dash.Dash(__name__, external_stylesheets=[dbc.themes.MINTY])
+app = dash.Dash(__name__, external_stylesheets=[dbc.themes.MINTY], title="Movey Money")
 
 server = app.server
 data = read_data()
@@ -80,7 +80,7 @@ def plot_linechart(genres, years):
             color=alt.Color("genres", title="Genre"),
             opacity=alt.condition(click, alt.value(0.9), alt.value(0.05)),
         )
-        .transform_loess("release_month", "profit", groupby=["genres"], bandwidth=0.3)
+        .transform_loess("release_month", "profit", groupby=["genres"], bandwidth=0.35)
         .mark_line()
     )
     return (
@@ -183,8 +183,20 @@ def generate_dash_table(selected_genre, years, budget):
     return table
 
 
-def init_genres():
-    return random.sample(list(data["genres"].unique()), 6)
+def generate_button(id):
+    button = dbc.Button(
+        "?",
+        id=id,
+        className="btn btn-info",
+        outline=False,
+        style={
+            "margin-top": "10px",
+            "width": "50px",
+            "display": "inline",
+            "float": "right",
+        },
+    )
+    return button
 
 
 @app.callback(
@@ -296,7 +308,8 @@ app.layout = dbc.Container(
                                                         html.Label(
                                                             "Discover historical and recent financial trends".upper(),
                                                             style={"font-size": 17},
-                                                        )
+                                                        ),
+                                                        generate_button("1"),
                                                     ]
                                                 ),
                                                 dbc.CardBody(
@@ -338,7 +351,8 @@ app.layout = dbc.Container(
                                                             "Identify most-liked genres".upper(),
                                                             style={"font-size": 17},
                                                         ),
-                                                    ]
+                                                        generate_button("2"),
+                                                    ],
                                                 ),
                                                 dbc.CardBody(
                                                     [
@@ -374,7 +388,8 @@ app.layout = dbc.Container(
                                                             "Find some potential actors".upper(),
                                                             style={"font-size": 17},
                                                         ),
-                                                    ]
+                                                        generate_button("3"),
+                                                    ],
                                                 ),
                                                 dbc.CardBody(
                                                     [
