@@ -55,13 +55,12 @@ def plot_linechart(genres, years):
     filtered_data = data.query(
         "release_date >= @years[0] & release_date <= @years[1] & genres in @genres"
     )
-    filtered_data.loc[:, "budget_adj"] = filtered_data["budget_adj"] / 1000000
+    filtered_data.loc[:, "budget_adj"] = filtered_data.loc[:, "budget_adj"] / 1000000
+    filtered_data.loc[:, "profit"] = filtered_data.loc[:, "profit"] / 1000000
     click = alt.selection_multi(fields=["genres"], bind="legend")
     chart = (
         alt.Chart(filtered_data).mark_line(point=True).add_selection(click)
     ).properties(width=600, height=350)
-
-    filtered_data.loc[:, "profit"] = filtered_data["profit"] / 1000000
 
     return alt.hconcat(
         chart.encode(
@@ -78,35 +77,6 @@ def plot_linechart(genres, years):
             opacity=alt.condition(click, alt.value(0.9), alt.value(0.05)),
         ),
     ).to_html()
-
-    # return chart.to_html()
-
-
-# @app.callback(
-#     Output("profit_year", "srcDoc"),
-#     Input("genres", "value"),
-#     Input("years", "value"),
-# )
-# def plot_profit_vs_year(genres, years):
-#     filtered_data = data.query(
-#         "release_date >= @years[0] & release_date <= @years[1] & genres in @genres"
-#     )
-#     filtered_data.loc[:, "profit"] = filtered_data["profit"] / 1000000
-#     click = alt.selection_multi(fields=["genres"], bind="legend")
-#     chart = (
-#         alt.Chart(filtered_data)
-#         .mark_line(point=True)
-#         .encode(
-#             x=alt.X("month(release_date):O", title="Release Month"),
-#             y=alt.Y("median(profit):Q", title="Adjusted Profit (in million $)"),
-#             color=alt.Color("genres", title="Genre"),
-#             opacity=alt.condition(click, alt.value(0.9), alt.value(0.05)),
-#         )
-#         .configure_axis(grid=False)
-#         .configure_view(strokeOpacity=0)
-#         .add_selection(click)
-#     ).properties(width=600, height=350)
-#     return chart.to_html()
 
 
 @app.callback(
@@ -268,35 +238,16 @@ app.layout = dbc.Container(
                                         html.Iframe(
                                             id="linechart",
                                             style={
+                                                "display": "block",
+                                                "overflow": " hidden",
+                                                "margin": "auto",
                                                 "border-width": "0",
-                                                "width": "100%",
+                                                "width": "1500px",
                                                 "height": "500px",
                                             },
                                         ),
                                     ]
                                 ),
-                                # dbc.Col(
-                                #     [
-                                #         # Hidden div to store current genre selection
-                                #         html.Div(
-                                #             id="genre-legend-selection",
-                                #             style={"display": "none"},
-                                #         ),
-                                #         html.Br(),
-                                #         html.Label(
-                                #             "Plan your release month",
-                                #             style={"font-size": 20},
-                                #         ),
-                                #         html.Iframe(
-                                #             id="profit_year",
-                                #             style={
-                                #                 "border-width": "0",
-                                #                 "width": "100%",
-                                #                 "height": "450px",
-                                #             },
-                                #         ),
-                                #     ]
-                                # ),
                             ]
                         ),
                         # Second Row of Plots
