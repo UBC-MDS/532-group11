@@ -9,7 +9,6 @@ import dash_table
 # Core data science libraries
 import altair as alt
 import pandas as pd
-import random
 
 # Data loading functions
 from data import read_data
