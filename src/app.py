@@ -368,7 +368,7 @@ app.layout = dbc.Container(
                                                             html.P(
                                                                 """This section depicts trends for two very important financial indicators in the movie making business - namely budget and profit. 
                                                                 The plot on the left shows how budgets have changed over the years while the plot on the right can be used 
-                                                                to explore how release month might be related to the success of a movie based on profits. Lines are estimated using LOESS regression""",
+                                                                to explore how release month might be related to the success of a movie based on profits. Lines are estimated using LOESS regression.""",
                                                                 style={
                                                                     "font-size": "13px"
                                                                 },
@@ -421,7 +421,7 @@ app.layout = dbc.Container(
                                                             html.P(
                                                                 """
                                                                 This plot can help identify which type of movies are well-received by viewers 
-                                                                based on user-submitted ratings
+                                                                based on user-submitted ratings.
                                                                 """,
                                                                 style={
                                                                     "font-size": "13px"
@@ -439,7 +439,7 @@ app.layout = dbc.Container(
                                                                 "display": "block",
                                                                 "overflow": " hidden",
                                                                 "margin": "auto",
-                                                                "height": "100%",
+                                                                "height": "110%",
                                                                 "width": "690px",
                                                                 "border-width": "0",
                                                             },
@@ -469,9 +469,9 @@ app.layout = dbc.Container(
                                                         dbc.Collapse(
                                                             html.P(
                                                                 """
-                                                                This widget can help identify actors suitable for a movie in a given genre with a specific budget range in mind. 
+                                                                This widget can help identify suitable actors for a potential movie in a given genre with a specific budget range in mind. 
                                                                 The table suggests potential actors ranked based on the actor's experience in movies matching the specified criteria. 
-                                                                Specifically, "Count" represents the number of matching movies in the database that the given actor has starred in 
+                                                                Specifically, "Count" represents the number of matching movies in the database that the given actor has starred in.
                                                                 """,
                                                                 style={
                                                                     "font-size": "13px"
