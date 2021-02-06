@@ -185,7 +185,7 @@ def generate_button(id, text, width="50px", type="dark"):
 def generate_modal():
     modal = dbc.Modal(
         [
-            dbc.ModalHeader("Movey Maker"),
+            dbc.ModalHeader("Movey Money"),
             dbc.ModalBody(
                 dcc.Markdown(
                     """
@@ -255,8 +255,9 @@ app.layout = dbc.Container(
                         html.Div(
                             [
                                 html.H1(
-                                    "Movie Production Planner",
-                                )
+                                    "Movey Money",
+                                ),
+                                html.H5("A Movie Production Planning Dashboard"),
                             ],
                         )
                     ],
@@ -379,17 +380,19 @@ app.layout = dbc.Container(
                                                 ),
                                                 dbc.CardBody(
                                                     [
-                                                        html.Iframe(
-                                                            id="linechart",
-                                                            style={
-                                                                "display": "block",
-                                                                "overflow": " hidden",
-                                                                "margin": "auto",
-                                                                "border-width": "0",
-                                                                "width": "1550px",
-                                                                "height": "500px",
-                                                            },
-                                                        ),
+                                                        dcc.Loading(
+                                                            html.Iframe(
+                                                                id="linechart",
+                                                                style={
+                                                                    "display": "block",
+                                                                    "overflow": " hidden",
+                                                                    "margin": "auto",
+                                                                    "border-width": "0",
+                                                                    "width": "1550px",
+                                                                    "height": "500px",
+                                                                },
+                                                            ),
+                                                        )
                                                     ]
                                                 ),
                                             ],
@@ -553,7 +556,7 @@ app.layout = dbc.Container(
                                                                     [
                                                                         html.Label(
                                                                             [
-                                                                                "Discover some suitable actors!"
+                                                                                "Discover some potentially suitable actors"
                                                                             ],
                                                                             style={
                                                                                 "font-size": 13
