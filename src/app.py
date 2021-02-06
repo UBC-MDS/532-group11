@@ -43,12 +43,12 @@ def plot_linechart(genres, years):
         chart.encode(
             alt.X(
                 "release_year",
-                title="Release Year".upper(),
+                title="Release Year",
                 axis=alt.Axis(format="y", grid=False),
             ),
             alt.Y(
                 "budget_adj",
-                title="Budget (in million $)".upper(),
+                title="Budget (in million $)",
                 axis=alt.Axis(grid=False),
             ),
             color=alt.Color(
@@ -69,12 +69,12 @@ def plot_linechart(genres, years):
         chart.encode(
             x=alt.X(
                 "release_month",
-                title="Release Month".upper(),
+                title="Release Month",
                 axis=alt.Axis(grid=False),
             ),
             y=alt.Y(
                 "profit",
-                title="Profit (in million $)".upper(),
+                title="Profit (in million $)",
                 axis=alt.Axis(grid=False),
             ),
             color=alt.Color("genres", title="Genre"),
@@ -102,9 +102,7 @@ def plot_heatmap(genres, years):
         alt.Chart(filtered_data)
         .mark_rect()
         .encode(
-            x=alt.X(
-                "vote_average", bin=alt.Bin(maxbins=11), title="Vote Average".upper()
-            ),
+            x=alt.X("vote_average", bin=alt.Bin(maxbins=11), title="Vote Average"),
             y=alt.Y("genres", title=""),
             color=alt.Color("count()", title="Count"),
             tooltip="count()",
@@ -296,8 +294,8 @@ app.layout = dbc.Container(
                                                 dbc.CardHeader(
                                                     [
                                                         html.Label(
-                                                            "Discover historical and recent financial trends",
-                                                            style={"font-size": 20},
+                                                            "Discover historical and recent financial trends".upper(),
+                                                            style={"font-size": 17},
                                                         )
                                                     ]
                                                 ),
@@ -316,7 +314,12 @@ app.layout = dbc.Container(
                                                         ),
                                                     ]
                                                 ),
-                                            ]
+                                            ],
+                                            style={
+                                                "height": "100%",
+                                                "margin-left": "15px",
+                                                "background": "#f0f0f0",
+                                            },
                                         )
                                     ]
                                 ),
@@ -332,8 +335,8 @@ app.layout = dbc.Container(
                                                 dbc.CardHeader(
                                                     [
                                                         html.Label(
-                                                            "Identify most-liked genres",
-                                                            style={"font-size": 20},
+                                                            "Identify most-liked genres".upper(),
+                                                            style={"font-size": 17},
                                                         ),
                                                     ]
                                                 ),
@@ -352,7 +355,12 @@ app.layout = dbc.Container(
                                                         ),
                                                     ]
                                                 ),
-                                            ]
+                                            ],
+                                            style={
+                                                "height": "100%",
+                                                "margin": "15px 15px 15px 15px",
+                                                "background": "#f0f0f0",
+                                            },
                                         )
                                     ]
                                 ),
@@ -363,8 +371,8 @@ app.layout = dbc.Container(
                                                 dbc.CardHeader(
                                                     [
                                                         html.Label(
-                                                            "Find some potential actors",
-                                                            style={"font-size": 20},
+                                                            "Find some potential actors".upper(),
+                                                            style={"font-size": 17},
                                                         ),
                                                     ]
                                                 ),
@@ -375,7 +383,7 @@ app.layout = dbc.Container(
                                                                 dbc.Col(
                                                                     html.Label(
                                                                         [
-                                                                            "1. Drill down on a specific genre",
+                                                                            "Drill down on a specific genre",
                                                                             dcc.Dropdown(
                                                                                 id="genres_drill",
                                                                                 multi=False,
@@ -383,7 +391,10 @@ app.layout = dbc.Container(
                                                                                     "width": "200px"
                                                                                 },
                                                                             ),
-                                                                        ]
+                                                                        ],
+                                                                        style={
+                                                                            "font-size": 13
+                                                                        },
                                                                     ),
                                                                 )
                                                             ]
@@ -394,8 +405,11 @@ app.layout = dbc.Container(
                                                                     [
                                                                         html.Label(
                                                                             [
-                                                                                "2. Narrow down your budget"
-                                                                            ]
+                                                                                "Narrow down your budget"
+                                                                            ],
+                                                                            style={
+                                                                                "font-size": 13
+                                                                            },
                                                                         ),
                                                                         dcc.RangeSlider(
                                                                             id="budget",
@@ -434,8 +448,11 @@ app.layout = dbc.Container(
                                                                     [
                                                                         html.Label(
                                                                             [
-                                                                                "3. Select an actor!"
-                                                                            ]
+                                                                                "Discover some suitable actors!"
+                                                                            ],
+                                                                            style={
+                                                                                "font-size": 13
+                                                                            },
                                                                         )
                                                                     ]
                                                                 )
@@ -448,9 +465,14 @@ app.layout = dbc.Container(
                                                                 )
                                                             ]
                                                         ),
-                                                    ]
+                                                    ],
                                                 ),
-                                            ]
+                                            ],
+                                            style={
+                                                "height": "100%",
+                                                "margin-top": "15px",
+                                                "background": "#f0f0f0",
+                                            },
                                         )
                                     ],
                                 ),
@@ -465,6 +487,7 @@ app.layout = dbc.Container(
                 )
             ]
         ),
+        html.Br(),
         html.Hr(),
         dcc.Markdown(
             "This dashboard was created by Yazan Saleh, Rahul Kuriyedath, and Yanhua Chen. You can find the source code on [GitHub](https://github.com/UBC-MDS/532-group11). The data was provided by [The Movie Database (TMDB)](https://www.themoviedb.org/?language=en-CA) and was sourced from [Kaggle](https://www.kaggle.com/juzershakir/tmdb-movies-dataset). This project is released under the [MIT License](https://github.com/UBC-MDS/532-group11/blob/main/LICENSE)"
