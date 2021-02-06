@@ -20,7 +20,7 @@ app = dash.Dash(external_stylesheets=[dbc.themes.MINTY])
 server = app.server
 data = read_data()
 
-alt.themes.enable("latimes")
+alt.themes.enable("fivethirtyeight")
 
 
 @app.callback(
@@ -72,7 +72,7 @@ def plot_linechart(genres, years):
                 ),
                 alt.Y(
                     "mean(budget_adj)",
-                    title="Adjusted Mean Budget (in million $)",
+                    title="Mean Budget (in million $)",
                     axis=alt.Axis(grid=False),
                 ),
                 tooltip=["release_year", "mean(budget_adj)"],
@@ -86,16 +86,21 @@ def plot_linechart(genres, years):
                     axis=alt.Axis(grid=False),
                 ),
                 y=alt.Y(
-                    "median(profit):Q",
-                    title="Adjusted Profit (in million $)",
+                    "mean(profit):Q",
+                    title="Mean Profit (in million $)",
                     axis=alt.Axis(grid=False),
                 ),
                 color=alt.Color("genres", title="Genre"),
                 opacity=alt.condition(click, alt.value(0.9), alt.value(0.05)),
             ),
         )
-        .configure_view(strokeOpacity=0)
-        .to_html()
+        # .configure_axisY(
+        #     titleAngle=-90,
+        #     titleAlign="left",
+        #     titleY=250,
+        #     titleX=-30,
+        # )
+        .configure_view(strokeOpacity=0).to_html()
     )
 
 
@@ -376,6 +381,7 @@ app.layout = dbc.Container(
         ),
     ],
     fluid=True,
+    style={"background": "#f0f0f0"},
 )
 
 
