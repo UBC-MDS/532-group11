@@ -24,29 +24,6 @@ alt.themes.enable("fivethirtyeight")
 
 
 @app.callback(
-    Output("heatmap", "srcDoc"),
-    Input("genres", "value"),
-    Input("years", "value"),
-)
-def plot_heatmap(genres, years):
-    filtered_data = data.query(
-        "release_date >= @years[0] & release_date <= @years[1] & genres in @genres"
-    )
-    alt.data_transformers.disable_max_rows()
-    chart = (
-        alt.Chart(filtered_data)
-        .mark_rect()
-        .encode(
-            x=alt.X("vote_average", bin=alt.Bin(maxbins=11), title="Vote Average"),
-            y=alt.Y("genres", title=""),
-            color=alt.Color("count()", title="Count"),
-            tooltip="count()",
-        )
-    ).properties(width=450, height=350)
-    return chart.to_html()
-
-
-@app.callback(
     Output("linechart", "srcDoc"),
     Input("genres", "value"),
     Input("years", "value"),
@@ -110,6 +87,29 @@ def plot_linechart(genres, years):
     return (
         alt.hconcat(first_chart, second_chart).configure_view(strokeOpacity=0).to_html()
     )
+
+
+@app.callback(
+    Output("heatmap", "srcDoc"),
+    Input("genres", "value"),
+    Input("years", "value"),
+)
+def plot_heatmap(genres, years):
+    filtered_data = data.query(
+        "release_date >= @years[0] & release_date <= @years[1] & genres in @genres"
+    )
+    alt.data_transformers.disable_max_rows()
+    chart = (
+        alt.Chart(filtered_data)
+        .mark_rect()
+        .encode(
+            x=alt.X("vote_average", bin=alt.Bin(maxbins=11), title="Vote Average"),
+            y=alt.Y("genres", title=""),
+            color=alt.Color("count()", title="Count"),
+            tooltip="count()",
+        )
+    ).properties(width=450, height=350)
+    return chart.to_html()
 
 
 @app.callback(
@@ -351,7 +351,7 @@ app.layout = dbc.Container(
                                                         dcc.RangeSlider(
                                                             id="budget",
                                                             count=1,
-                                                            step=1,
+                                                            step=5000000,
                                                             min=data[
                                                                 "budget_adj"
                                                             ].min(),
@@ -360,8 +360,8 @@ app.layout = dbc.Container(
                                                             ].max(),
                                                             value=[0, 425000000],
                                                             marks={
-                                                                0.99: "0",
-                                                                425000000: "425,000,000",
+                                                                0.99: "$0",
+                                                                425000000: "$425 million",
                                                             },
                                                             tooltip={
                                                                 "always_visible": False,
