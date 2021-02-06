@@ -190,7 +190,6 @@ def generate_button(id):
         className="btn btn-info",
         outline=False,
         style={
-            "margin-top": "10px",
             "width": "50px",
             "display": "inline",
             "float": "right",
@@ -335,7 +334,9 @@ app.layout = dbc.Container(
                                                         generate_button("1"),
                                                         dbc.Collapse(
                                                             html.P(
-                                                                "This content is hidden in the collapse",
+                                                                """This section depicts trends for two very important financial indicators in the movie making business - namely budget and profit. 
+                                                                The plot on the left shows how budgets have changed over the years while the plot on the right can be used 
+                                                                to explore how release month might be related to the success of a movie based on profits. Lines are estimated using LOESS regression""",
                                                                 style={
                                                                     "font-size": "13px"
                                                                 },
@@ -386,7 +387,10 @@ app.layout = dbc.Container(
                                                         generate_button("2"),
                                                         dbc.Collapse(
                                                             html.P(
-                                                                "This content is hidden in the collapse",
+                                                                """
+                                                                This plot can help identify which type of movies are well-received by viewers 
+                                                                based on user-submitted ratings
+                                                                """,
                                                                 style={
                                                                     "font-size": "13px"
                                                                 },
@@ -432,7 +436,11 @@ app.layout = dbc.Container(
                                                         generate_button("3"),
                                                         dbc.Collapse(
                                                             html.P(
-                                                                "This content is hidden in the collapse",
+                                                                """
+                                                                This widget can help identify actors suitable for a movie in a given genre with a specific budget range in mind. 
+                                                                The table suggests potential actors ranked based on the actor's experience in movies matching the specified criteria. 
+                                                                Specifically, "Count" represents the number of matching movies in the database that the given actor has starred in 
+                                                                """,
                                                                 style={
                                                                     "font-size": "13px"
                                                                 },
