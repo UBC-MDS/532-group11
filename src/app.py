@@ -291,22 +291,33 @@ app.layout = dbc.Container(
                             [
                                 dbc.Col(
                                     [
-                                        html.Br(),
-                                        html.Label(
-                                            "Discover historical and recent financial trends",
-                                            style={"font-size": 20},
-                                        ),
-                                        html.Iframe(
-                                            id="linechart",
-                                            style={
-                                                "display": "block",
-                                                "overflow": " hidden",
-                                                "margin": "auto",
-                                                "border-width": "0",
-                                                "width": "1550px",
-                                                "height": "500px",
-                                            },
-                                        ),
+                                        dbc.Card(
+                                            [
+                                                dbc.CardHeader(
+                                                    [
+                                                        html.Label(
+                                                            "Discover historical and recent financial trends",
+                                                            style={"font-size": 20},
+                                                        )
+                                                    ]
+                                                ),
+                                                dbc.CardBody(
+                                                    [
+                                                        html.Iframe(
+                                                            id="linechart",
+                                                            style={
+                                                                "display": "block",
+                                                                "overflow": " hidden",
+                                                                "margin": "auto",
+                                                                "border-width": "0",
+                                                                "width": "1550px",
+                                                                "height": "500px",
+                                                            },
+                                                        ),
+                                                    ]
+                                                ),
+                                            ]
+                                        )
                                     ]
                                 ),
                             ]
