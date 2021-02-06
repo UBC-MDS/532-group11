@@ -34,15 +34,15 @@ def plot_heatmap(genres, years):
     )
     alt.data_transformers.disable_max_rows()
     chart = (
-        alt.Chart(filtered_data, title="Vote Average by Genre")
+        alt.Chart(filtered_data)
         .mark_rect()
         .encode(
-            x=alt.X("vote_average", bin=alt.Bin(maxbins=40), title="Vote Average"),
+            x=alt.X("vote_average", bin=alt.Bin(maxbins=11), title="Vote Average"),
             y=alt.Y("genres", title=""),
             color=alt.Color("count()", title="Count"),
             tooltip="count()",
         )
-    ).properties(width=350, height=300)
+    ).properties(width=450, height=350)
     return chart.to_html()
 
 
@@ -94,13 +94,8 @@ def plot_linechart(genres, years):
                 opacity=alt.condition(click, alt.value(0.9), alt.value(0.05)),
             ),
         )
-        # .configure_axisY(
-        #     titleAngle=-90,
-        #     titleAlign="left",
-        #     titleY=250,
-        #     titleX=-30,
-        # )
-        .configure_view(strokeOpacity=0).to_html()
+        .configure_view(strokeOpacity=0)
+        .to_html()
     )
 
 
@@ -140,11 +135,20 @@ def generate_dash_table(selected_genre, years, budget):
             "backgroundColor": "rgb(230, 230, 230)",
             "fontWeight": "bold",
             "class": "table",
+            "color": "#343a40",
         },
         style_data_conditional=[
-            {"if": {"row_index": "odd"}, "backgroundColor": "rgb(240, 240, 230)"}
+            {
+                "if": {"row_index": "odd"},
+                "backgroundColor": "#78c2ad",
+                "color": "#343a40",
+            }
         ],
-        style_cell={"padding": "7px"},
+        style_cell={
+            "padding": "7px",
+            "color": "white",
+            "backgroundColor": "#454d55",
+        },
     )
     return table
 
@@ -257,7 +261,7 @@ app.layout = dbc.Container(
                                     [
                                         html.Br(),
                                         html.Label(
-                                            "Discover historical and recent budget trends",
+                                            "Discover historical and recent financial trends",
                                             style={"font-size": 20},
                                         ),
                                         html.Iframe(
@@ -288,9 +292,12 @@ app.layout = dbc.Container(
                                         html.Iframe(
                                             id="heatmap",
                                             style={
-                                                "border-width": "0",
-                                                "width": "100%",
+                                                "display": "block",
+                                                "overflow": " hidden",
+                                                "margin": "auto",
                                                 "height": "100%",
+                                                "width": "650px",
+                                                "border-width": "0",
                                             },
                                         ),
                                     ]
@@ -365,8 +372,14 @@ app.layout = dbc.Container(
                                                 )
                                             ]
                                         ),
-                                        dbc.Row([dbc.Col(id="actor_col")]),
-                                    ]
+                                        dbc.Row(
+                                            [
+                                                dbc.Col(
+                                                    id="actor_col",
+                                                )
+                                            ]
+                                        ),
+                                    ],
                                 ),
                             ]
                         ),
