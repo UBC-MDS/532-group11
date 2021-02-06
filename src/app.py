@@ -162,7 +162,6 @@ def generate_dash_table(selected_genre, years, budget):
             "padding": "7px",
             "color": "white",
             "backgroundColor": "#454d55",
-            "className": "cell-markdown",
         },
     )
     return table
