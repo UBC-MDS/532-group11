@@ -199,27 +199,56 @@ def generate_button(id, text, width="50px", type="dark"):
     return button
 
 
+def generate_modal():
+    modal = dbc.Modal(
+        [
+            dbc.ModalHeader("Movey Maker"),
+            dbc.ModalBody(
+                dcc.Markdown(
+                    """
+            This data visualization app aims at helping movie producers plan their next release. 
+            The app contains key visualizations showing the financial trends, popularity metrics, as well as an actor selection widgets in order to help decision-makers identify factors that contribute to these key aspects. For more information please see the [detailed project proposal](https://github.com/UBC-MDS/532-group11/blob/main/proposal.md).
+            """
+                )
+            ),
+            dbc.ModalFooter(
+                dbc.Button("Close", id="close-button-0", className="ml-auto")
+            ),
+        ],
+        id="modal",
+    )
+    return modal
+
+
 @app.callback(
+    Output("modal", "is_open"),
     Output("collapse-1", "is_open"),
     Output("collapse-2", "is_open"),
     Output("collapse-3", "is_open"),
+    [Input("button-0", "n_clicks")],
+    [Input("close-button-0", "n_clicks")],
     [Input("button-1", "n_clicks")],
     [Input("button-2", "n_clicks")],
     [Input("button-3", "n_clicks")],
+    [State("modal", "is_open")],
     [State("collapse-1", "is_open")],
     [State("collapse-2", "is_open")],
     [State("collapse-3", "is_open")],
 )
-def toggle_collapse(n1, n2, n3, is_open1, is_open2, is_open3):
+def toggle_collapse(n0, n0c, n1, n2, n3, is_open0, is_open1, is_open2, is_open3):
     changed_id = [p["prop_id"] for p in dash.callback_context.triggered][0]
-    if "button-1" in changed_id:
-        return (not is_open1, is_open2, is_open3)
+    if "button-0" in changed_id:
+        return (not is_open0, is_open1, is_open2, is_open3)
+    elif "close-button-0" in changed_id:
+        return (not is_open0, is_open1, is_open2, is_open3)
+    elif "button-1" in changed_id:
+        return (is_open0, not is_open1, is_open2, is_open3)
     elif "button-2" in changed_id:
-        return (is_open1, not is_open2, is_open3)
+        return (is_open0, is_open1, not is_open2, is_open3)
     elif "button-3" in changed_id:
-        return (is_open1, is_open2, not is_open3)
+        return (is_open0, is_open1, is_open2, not is_open3)
     else:
-        return (is_open1, is_open2, is_open3)
+        return (is_open0, is_open1, is_open2, is_open3)
 
 
 @app.callback(
@@ -254,6 +283,7 @@ app.layout = dbc.Container(
                         generate_button(
                             "0", text="LEARN MORE", width="150px", type="Main"
                         ),
+                        generate_modal(),
                     ]
                 ),
             ],
