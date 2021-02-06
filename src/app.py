@@ -327,21 +327,33 @@ app.layout = dbc.Container(
                             [
                                 dbc.Col(
                                     [
-                                        html.Label(
-                                            "Identify most-liked genres",
-                                            style={"font-size": 20},
-                                        ),
-                                        html.Iframe(
-                                            id="heatmap",
-                                            style={
-                                                "display": "block",
-                                                "overflow": " hidden",
-                                                "margin": "auto",
-                                                "height": "100%",
-                                                "width": "690px",
-                                                "border-width": "0",
-                                            },
-                                        ),
+                                        dbc.Card(
+                                            [
+                                                dbc.CardHeader(
+                                                    [
+                                                        html.Label(
+                                                            "Identify most-liked genres",
+                                                            style={"font-size": 20},
+                                                        ),
+                                                    ]
+                                                ),
+                                                dbc.CardBody(
+                                                    [
+                                                        html.Iframe(
+                                                            id="heatmap",
+                                                            style={
+                                                                "display": "block",
+                                                                "overflow": " hidden",
+                                                                "margin": "auto",
+                                                                "height": "100%",
+                                                                "width": "690px",
+                                                                "border-width": "0",
+                                                            },
+                                                        ),
+                                                    ]
+                                                ),
+                                            ]
+                                        )
                                     ]
                                 ),
                                 dbc.Col(
