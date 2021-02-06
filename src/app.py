@@ -15,7 +15,7 @@ import random
 from data import read_data
 
 
-app = dash.Dash(external_stylesheets=[dbc.themes.MINTY])
+app = dash.Dash(__name__, external_stylesheets=[dbc.themes.MINTY])
 
 server = app.server
 data = read_data()
@@ -120,6 +120,7 @@ def plot_heatmap(genres, years):
     Input("budget", "value"),
 )
 def generate_dash_table(selected_genre, years, budget):
+
     filtered_data = data.query(
         "release_date >= @years[0] & release_date <= @years[1] & genres == @selected_genre & budget_adj >= @budget[0] & budget_adj <= @budget[1]"
     )
@@ -420,6 +421,10 @@ app.layout = dbc.Container(
                     },
                 )
             ]
+        ),
+        html.Hr(),
+        dcc.Markdown(
+            "This dashboard was created by Yazan Saleh, Rahul Kuriyedath, and Yanhua Chen. You can find the source code on [GitHub](https://github.com/UBC-MDS/532-group11). The data was provided by [The Movie Database (TMDB)](https://www.themoviedb.org/?language=en-CA) and was sourced from [Kaggle](https://www.kaggle.com/juzershakir/tmdb-movies-dataset). This project is released under the [MIT License](https://github.com/UBC-MDS/532-group11/blob/main/LICENSE)"
         ),
     ],
     fluid=True,
