@@ -58,44 +58,57 @@ def plot_linechart(genres, years):
     filtered_data.loc[:, "budget_adj"] = filtered_data.loc[:, "budget_adj"] / 1000000
     filtered_data.loc[:, "profit"] = filtered_data.loc[:, "profit"] / 1000000
     click = alt.selection_multi(fields=["genres"], bind="legend")
-    chart = (
-        alt.Chart(filtered_data).mark_line(point=True).add_selection(click)
-    ).properties(width=600, height=350)
+    chart = (alt.Chart(filtered_data).mark_point().add_selection(click)).properties(
+        width=600, height=350
+    )
 
-    return (
-        alt.hconcat(
-            chart.encode(
-                alt.X(
-                    "release_year",
-                    title="Release Year",
-                    axis=alt.Axis(format="y", grid=False),
-                ),
-                alt.Y(
-                    "mean(budget_adj)",
-                    title="Mean Budget (in million $)",
-                    axis=alt.Axis(grid=False),
-                ),
-                tooltip=["release_year", "mean(budget_adj)"],
-                color=alt.Color("genres", title="Genre"),
-                opacity=alt.condition(click, alt.value(0.9), alt.value(0.05)),
+    first_chart = (
+        chart.encode(
+            alt.X(
+                "release_year",
+                title="Release Year",
+                axis=alt.Axis(format="y", grid=False),
             ),
-            chart.encode(
-                x=alt.X(
-                    "month(release_date):O",
-                    title="Release Month",
-                    axis=alt.Axis(grid=False),
-                ),
-                y=alt.Y(
-                    "mean(profit):Q",
-                    title="Mean Profit (in million $)",
-                    axis=alt.Axis(grid=False),
-                ),
-                color=alt.Color("genres", title="Genre"),
-                opacity=alt.condition(click, alt.value(0.9), alt.value(0.05)),
+            alt.Y(
+                "mean(budget_adj)",
+                title="Budget (in million $)",
+                axis=alt.Axis(grid=False),
             ),
+            tooltip=["release_year", "mean(budget_adj)"],
+            color=alt.Color(
+                "genres", title="Genre", legend=alt.Legend(labelFontSize=17)
+            ),
+            opacity=alt.condition(click, alt.value(0.9), alt.value(0.05)),
         )
-        .configure_view(strokeOpacity=0)
-        .to_html()
+        .transform_loess(
+            loess="budget_adj",
+            on="release_year",
+            groupby=["genres"],
+            bandwidth=0.35,
+        )
+        .mark_line()
+    )
+
+    second_chart = (
+        chart.encode(
+            x=alt.X(
+                "release_month",
+                title="Release Month",
+                axis=alt.Axis(grid=False),
+            ),
+            y=alt.Y(
+                "mean(profit):Q",
+                title="Profit (in million $)",
+                axis=alt.Axis(grid=False),
+            ),
+            color=alt.Color("genres", title="Genre"),
+            opacity=alt.condition(click, alt.value(0.9), alt.value(0.05)),
+        )
+        .transform_loess("release_month", "profit", groupby=["genres"], bandwidth=0.3)
+        .mark_line()
+    )
+    return (
+        alt.hconcat(first_chart, second_chart).configure_view(strokeOpacity=0).to_html()
     )
 
 
