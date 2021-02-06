@@ -62,21 +62,41 @@ def plot_linechart(genres, years):
         alt.Chart(filtered_data).mark_line(point=True).add_selection(click)
     ).properties(width=600, height=350)
 
-    return alt.hconcat(
-        chart.encode(
-            alt.X("release_year", title="Release Year", axis=alt.Axis(format="y")),
-            alt.Y("mean(budget_adj)", title="Adjusted Mean Budget (in million $)"),
-            tooltip=["release_year", "mean(budget_adj)"],
-            color=alt.Color("genres", title="Genre"),
-            opacity=alt.condition(click, alt.value(0.9), alt.value(0.05)),
-        ),
-        chart.encode(
-            x=alt.X("month(release_date):O", title="Release Month"),
-            y=alt.Y("median(profit):Q", title="Adjusted Profit (in million $)"),
-            color=alt.Color("genres", title="Genre"),
-            opacity=alt.condition(click, alt.value(0.9), alt.value(0.05)),
-        ),
-    ).to_html()
+    return (
+        alt.hconcat(
+            chart.encode(
+                alt.X(
+                    "release_year",
+                    title="Release Year",
+                    axis=alt.Axis(format="y", grid=False),
+                ),
+                alt.Y(
+                    "mean(budget_adj)",
+                    title="Adjusted Mean Budget (in million $)",
+                    axis=alt.Axis(grid=False),
+                ),
+                tooltip=["release_year", "mean(budget_adj)"],
+                color=alt.Color("genres", title="Genre"),
+                opacity=alt.condition(click, alt.value(0.9), alt.value(0.05)),
+            ),
+            chart.encode(
+                x=alt.X(
+                    "month(release_date):O",
+                    title="Release Month",
+                    axis=alt.Axis(grid=False),
+                ),
+                y=alt.Y(
+                    "median(profit):Q",
+                    title="Adjusted Profit (in million $)",
+                    axis=alt.Axis(grid=False),
+                ),
+                color=alt.Color("genres", title="Genre"),
+                opacity=alt.condition(click, alt.value(0.9), alt.value(0.05)),
+            ),
+        )
+        .configure_view(strokeOpacity=0)
+        .to_html()
+    )
 
 
 @app.callback(
