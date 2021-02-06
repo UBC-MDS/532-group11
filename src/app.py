@@ -380,17 +380,19 @@ app.layout = dbc.Container(
                                                 ),
                                                 dbc.CardBody(
                                                     [
-                                                        html.Iframe(
-                                                            id="linechart",
-                                                            style={
-                                                                "display": "block",
-                                                                "overflow": " hidden",
-                                                                "margin": "auto",
-                                                                "border-width": "0",
-                                                                "width": "1550px",
-                                                                "height": "500px",
-                                                            },
-                                                        ),
+                                                        dcc.Loading(
+                                                            html.Iframe(
+                                                                id="linechart",
+                                                                style={
+                                                                    "display": "block",
+                                                                    "overflow": " hidden",
+                                                                    "margin": "auto",
+                                                                    "border-width": "0",
+                                                                    "width": "1550px",
+                                                                    "height": "500px",
+                                                                },
+                                                            ),
+                                                        )
                                                     ]
                                                 ),
                                             ],
