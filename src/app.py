@@ -233,6 +233,8 @@ def update_genres(genres):
         options_list.append({"label": item, "value": item})
     return (options_list, options_list[0]["label"])
 
+    #                  generate_button("0", text="LEARN MORE"),
+
 
 app.layout = dbc.Container(
     [
@@ -240,20 +242,24 @@ app.layout = dbc.Container(
             [
                 dbc.Col(
                     [
-                        html.H1(
-                            "Movie Production Planner",
-                            style={
-                                "backgroundColor": "#78c2ad",
-                                "padding": 20,
-                                "color": "white",
-                                "margin-top": 20,
-                                "margin-bottom": 20,
-                                "text-align": "left",
-                                "font-size": "48px",
-                                "border-radius": 3,
-                            },
-                        ),
-                    ]
+                        html.Div(
+                            [
+                                html.H1(
+                                    "Movie Production Planner",
+                                    style={
+                                        "backgroundColor": "#78c2ad",
+                                        "padding": 20,
+                                        "color": "white",
+                                        "margin-top": 20,
+                                        "margin-bottom": 20,
+                                        "text-align": "left",
+                                        "font-size": "48px",
+                                        "border-radius": 3,
+                                    },
+                                ),
+                            ]
+                        )
+                    ],
                 )
             ]
         ),
