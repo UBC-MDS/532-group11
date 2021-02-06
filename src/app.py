@@ -128,14 +128,6 @@ def generate_dash_table(selected_genre, years, budget):
     )
     top_actors.index.names = ["actor"]
     top_actors.reset_index(inplace=True)
-    link = list()
-    for i in range(len(top_actors)):
-        url = "https://en.wikipedia.org/wiki/" + top_actors.iloc[i]["actor"].replace(
-            " ", "_"
-        )
-        markdown_link = f"[{top_actors.iloc[i]['actor']}](" + str(url) + ")"
-        link.append(markdown_link)
-    top_actors["link"] = link
     table = dash_table.DataTable(
         id="actorDataTable",
         columns=[
@@ -147,13 +139,6 @@ def generate_dash_table(selected_genre, years, budget):
             {
                 "name": "Count",
                 "id": "count",
-                "selectable": False,
-            },
-            {
-                "name": "Link",
-                "id": "link",
-                "type": "text",
-                "presentation": "markdown",
                 "selectable": False,
             },
         ],
