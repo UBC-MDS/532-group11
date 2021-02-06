@@ -183,14 +183,14 @@ def generate_dash_table(selected_genre, years, budget):
     return table
 
 
-def generate_button(id, text):
+def generate_button(id, text, width="50px", type="dark"):
     button = dbc.Button(
         text,
         id=f"button-{id}",
-        className="btn btn-info",
+        className="btn btn-info" if type == "dark" else "btn btn-light",
         outline=False,
         style={
-            "width": "50px",
+            "width": width,
             "display": "inline",
             "float": "right",
             "font-weight": "800",
@@ -246,22 +246,28 @@ app.layout = dbc.Container(
                             [
                                 html.H1(
                                     "Movie Production Planner",
-                                    style={
-                                        "backgroundColor": "#78c2ad",
-                                        "padding": 20,
-                                        "color": "white",
-                                        "margin-top": 20,
-                                        "margin-bottom": 20,
-                                        "text-align": "left",
-                                        "font-size": "48px",
-                                        "border-radius": 3,
-                                    },
-                                ),
-                            ]
+                                )
+                            ],
                         )
                     ],
-                )
-            ]
+                ),
+                dbc.Col(
+                    [
+                        generate_button(
+                            "0", text="LEARN MORE", width="150px", type="Main"
+                        ),
+                    ]
+                ),
+            ],
+            style={
+                "backgroundColor": "#78c2ad",
+                "padding": 20,
+                "margin-top": 0,
+                "margin-bottom": 10,
+                "text-align": "left",
+                "font-size": "48px",
+                "border-radius": 5,
+            },
         ),
         html.Br(),
         dbc.Row(
