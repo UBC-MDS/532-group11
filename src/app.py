@@ -553,7 +553,7 @@ app.layout = dbc.Container(
                                                                     [
                                                                         html.Label(
                                                                             [
-                                                                                "Discover some suitable actors!"
+                                                                                "Discover some potentially suitable actors"
                                                                             ],
                                                                             style={
                                                                                 "font-size": 13
