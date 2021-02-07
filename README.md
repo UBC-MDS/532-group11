@@ -26,4 +26,4 @@ This would help the user plan the release month for their movie. The user will b
 
 ## App Sketch
 
-![sketch of the app](img/app_sketch.png "App Sketch")
+![sketch of the app](img/AppSketch_final.png "App Sketch")

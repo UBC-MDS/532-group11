@@ -15,3 +15,15 @@ We will be visualizing a dataset of approximately 10,000 movies. Each movie has 
 ## Section 3: Research and usage scenarios
 
 J. Lambert runs a start-up movie production company in North America. Due to the limited venture capital in the entertainment industry in 2020-2021, J. Lambert wants to ensure that he only selects profitable movies for production in his company. He wants to be able to explore a dataset in order to compare how different movie attributes are related to the gross profit. When J. Lambert logs on to the “Movie Producer App”, he will see a heatmap showing the distribution of movie rating across different genres. Also, he can compare movie budgets across different genres and years. There are some additional functions included in our app. For example, J. Lambert can use “actor filter” to see a list of suggested actors for a specific genre and based on a specified budget range. Finally, he can use “Release Date Recommendation” to see what time of the year it might be best to release a new movie for the purpose of generating higher profit. He hypothesizes that action movie is the most profitable genre in the past few years and he plan to release it during summer time.
+
+Some of the research questions that can be answered using our dashboard include :-
+
+- Which genres tend to be well received by audiences?
+
+- What is the average current cost to produce a movie of a particular genre?
+
+- Have movie budgets for a given genre gone up or down in recent years?
+
+- Which actor the most experienced (number of movies acted in) in a given genre, given a time period?
+
+- Is there a relation between month of release of a movie and the profit made by it?
