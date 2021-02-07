@@ -39,7 +39,7 @@ def plot_heatmap(genres, years):
             color=alt.Color("count()", title="Count"),
             tooltip="count()",
         )
-    ).properties()
+    ).properties(width=350, height=300)
     return chart.to_html()
 
 
